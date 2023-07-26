@@ -7,4 +7,16 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#FFE5F9F1</color>
+    <color name="wave_color">#FF27D693</color>
+
+
+    <color name="reportWave">#242A38</color>
+
+    <color name="wavebg1">#4dff0000</color>
+    <color name="wavebg2">#1aff0000</color>
+    <color name="wavebg3">#A8E8CF</color>
+    <color name="wavebg4">#E6FAF2</color>
+    <color name="report_wave_time">#ffbfbfbf</color>
+    <color name="report_wave_hint_line">#ffcccccc</color>
 </resources>
