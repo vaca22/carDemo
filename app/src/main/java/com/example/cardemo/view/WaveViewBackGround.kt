@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat
 import com.example.cardemo.R
 
 
-class WaveViewBackGround2 : View {
+class WaveViewBackGround : View {
 
     interface Ga {
         fun yes(x: Int, y: Int)
@@ -106,70 +106,61 @@ class WaveViewBackGround2 : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-
         canvas.drawARGB(255, 255, 255, 255)
-
-        val xy=0.1f* WavePara.co
-        var nn=0f
-
-
-        var km=0
+        val gridSize=0.1f* WavePara.pixelsPerMv
+        var tempX=0f
+        var index=0
         do{
-            nn=km.toFloat()*xy
+            tempX=index.toFloat()*gridSize
             canvas.drawLine(
-                nn,
+                tempX,
                 0f,
-                nn,
+                tempX,
                 height.toFloat(),
                 x2Paint
             )
-            km++
-        }while (nn<=width)
+            index++
+        }while (tempX<=width)
 
-        km=0
+        index=0
         do{
-            nn=km*xy
+            tempX=index*gridSize
             canvas.drawLine(
                 0f,
-                nn,
+                tempX,
                 width.toFloat(),
-                nn,
+                tempX,
                 x2Paint
             )
-            km++
-        }while (nn<=height)
+            index++
+        }while (tempX<=height)
 
 
-        km=0
+        index=0
         do{
-            nn=km*xy
+            tempX=index*gridSize
             canvas.drawLine(
-                nn,
+                tempX,
                 0f,
-                nn,
+                tempX,
                 height.toFloat(),
                 x1Paint
             )
-            km+=5
-        }while (nn<=width)
+            index+=5
+        }while (tempX<=width)
 
-
-        km=0
+        index=0
         do{
-            nn=km*xy
+            tempX=index*gridSize
             canvas.drawLine(
                 0f,
-                nn,
+                tempX,
                 width.toFloat(),
-                nn,
+                tempX,
                 x1Paint
             )
-            km+=5
-        }while (nn<=height)
-
-
-
+            index+=5
+        }while (tempX<=height)
     }
 
 

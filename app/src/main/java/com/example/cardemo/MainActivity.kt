@@ -11,8 +11,8 @@ import com.example.cardemo.propertyID.mControlIds
 import com.example.cardemo.propertyID.mControlNames
 import com.example.cardemo.view.CustomAdapter
 import com.example.cardemo.view.WavePara.drawTask
-import com.example.cardemo.view.WavePara.er2Graph
 import com.example.cardemo.view.WavePara.offerTask
+import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WaveView
 import java.util.Date
 import java.util.Timer
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             androidx.recyclerview.widget.LinearLayoutManager(this).apply {
                 orientation = androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
             }
-        er2Graph.observe(this) {
+        updateSignal.observe(this) {
             Log.e("vaca", "er2Graph: $it")
             binding.waveView.invalidate()
         }
@@ -59,8 +59,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-//        drawTask?.cancel()
-//        drawTask = null
+        drawTask?.cancel()
+        drawTask = null
         super.onStop()
     }
 

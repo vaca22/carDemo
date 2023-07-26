@@ -9,8 +9,8 @@ import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.cardemo.R
-import com.example.cardemo.view.WavePara.co
-import com.example.cardemo.view.WavePara.er2Graph
+import com.example.cardemo.view.WavePara.pixelsPerMv
+import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WavePara.realTimeDoubler
 import com.example.cardemo.view.WavePara.waveDataX
 import java.util.TimerTask
@@ -51,7 +51,7 @@ class WaveView : View {
 
         fun poss(it: Er1Draw) {
             for (k in 0 until pkgsize) {
-                data[currentUpdateIndex] = (it.data[k] * co).toInt()
+                data[currentUpdateIndex] = (it.data[k] * pixelsPerMv).toInt()
                 currentUpdateIndex++
                 if (currentUpdateIndex >= drawSize) {
                     currentUpdateIndex -= drawSize
@@ -83,7 +83,7 @@ class WaveView : View {
                     gIndex = 0;
                     poss(Er1Draw(g))
                     Log.e("vaca","drawTask")
-                    er2Graph.postValue(true)
+                    updateSignal.postValue(true)
                 } catch (e: java.lang.Exception) {
                     waveDataX.clear()
                     gIndex = 0;
@@ -192,8 +192,8 @@ class WaveView : View {
         super.onDraw(canvas)
         nd=width/drawSize.toFloat()
         canvas.drawARGB(0, 0, 0, 0)
-        val baseY = 2.5f*co
-        canvas.drawLine(30f, co * 2.5f - realTimeDoubler * co, 30f, co * 2.5f, linePaint)
+        val baseY = 2.5f*pixelsPerMv
+        canvas.drawLine(30f, pixelsPerMv * 2.5f - realTimeDoubler * pixelsPerMv, 30f, pixelsPerMv * 2.5f, linePaint)
         canvas.drawText("1mV", 35f, baseY + 35f, timePaint)
         if (disp) {
             for ((index, h) in data.withIndex()) {

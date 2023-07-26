@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
 
-    <com.example.cardemo.view.WaveViewBackGround2
+    <com.example.cardemo.view.WaveViewBackGround
         android:elevation="0dp"
         android:id="@+id/bg"
         android:layout_width="match_parent"
