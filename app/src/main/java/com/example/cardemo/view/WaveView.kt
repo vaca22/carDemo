@@ -10,8 +10,8 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.cardemo.R
 import com.example.cardemo.view.WavePara.pixelsPerMv
-import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WavePara.realTimeDoubler
+import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WavePara.waveDataX
 import java.util.TimerTask
 
@@ -33,7 +33,7 @@ class WaveView : View {
         var currentTail = 0
 
 
-        val g = FloatArray(pkgsize)
+        val drawPkg = FloatArray(pkgsize)
         var gIndex = 0;
         var currentUpdateIndex = 0
 
@@ -49,7 +49,7 @@ class WaveView : View {
             currentTail = 0
         }
 
-        fun poss(it: Er1Draw) {
+        fun process(it: Er1Draw) {
             for (k in 0 until pkgsize) {
                 data[currentUpdateIndex] = (it.data[k] * pixelsPerMv).toInt()
                 currentUpdateIndex++
@@ -69,20 +69,21 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
-                Log.e("vaca","drawTask22")
+                Log.e("vaca", "DrawTask")
                 try {
                     do {
-                        val gx = waveDataX.poll()
-                        if (gx == null) {
+                        Log.e("vaca", "DrawTask1")
+                        val data = waveDataX.poll()
+                        if (data == null) {
+                            Log.e("vaca", "DrawTask2")
                             return
                         } else {
-                            g[gIndex] = gx
+                            drawPkg[gIndex] = data
                         }
                         gIndex++
                     } while (gIndex < pkgsize);
                     gIndex = 0;
-                    poss(Er1Draw(g))
-                    Log.e("vaca","drawTask")
+                    process(Er1Draw(drawPkg))
                     updateSignal.postValue(true)
                 } catch (e: java.lang.Exception) {
                     waveDataX.clear()
@@ -177,13 +178,12 @@ class WaveView : View {
         }
     }
 
-    val gauu=ArrayList<PointF>()
+    private val realDrawPoints=ArrayList<PointF>()
 
 
-    fun Canvas.dr2(){
-        for(k in 0 until gauu.size-1){
-            this.drawLine(gauu[k].x,gauu[k].y,gauu[k+1].x,gauu[k+1].y,wavePaint)
-            Log.e("vaca","drawLine ${gauu[k].x},${gauu[k].y},${gauu[k+1].x},${gauu[k+1].y}")
+    fun Canvas.drawEcg(){
+        for(k in 0 until realDrawPoints.size-1){
+            this.drawLine(realDrawPoints[k].x,realDrawPoints[k].y,realDrawPoints[k+1].x,realDrawPoints[k+1].y,wavePaint)
         }
     }
 
@@ -200,23 +200,23 @@ class WaveView : View {
                 val h1 = h * realTimeDoubler
                 n2 = judgePoint(index)
                 if ((n2 == 1) && (index == data.size - 1)) {
-                    canvas.dr2()
+                    canvas.drawEcg()
                     n1 = 0
                     break
                 }
                 if (n2 != n1) {
                     if (n1 > n2) {
-                        canvas.dr2()
+                        canvas.drawEcg()
                         n1 = 0
                     } else {
-                        gauu.clear()
-                        gauu.add(
+                        realDrawPoints.clear()
+                        realDrawPoints.add(
                             PointF(nd * index.toFloat(),
                                 baseY - h1.toFloat()))
                         n1 = 1
                     }
                 } else {
-                    gauu.add(
+                    realDrawPoints.add(
                         PointF(
                         nd * index.toFloat(),
                         baseY - h1.toFloat()

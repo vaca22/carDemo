@@ -4,12 +4,14 @@ import android.car.Car
 import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
 import com.example.cardemo.databinding.ActivityMainBinding
-import com.example.cardemo.propertyID.mControlIds
-import com.example.cardemo.propertyID.mControlNames
-import com.example.cardemo.view.CustomAdapter
+import com.example.cardemo.view.Converter
+import com.example.cardemo.view.Er1WaveUtil
+import com.example.cardemo.view.WavePara
 import com.example.cardemo.view.WavePara.drawTask
 import com.example.cardemo.view.WavePara.offerTask
 import com.example.cardemo.view.WavePara.updateSignal
@@ -20,33 +22,41 @@ import java.util.Timer
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    lateinit var customAdapter: CustomAdapter
 
+    val leadStatus=MutableLiveData<String>()
+    val ecgData=MutableLiveData<IntArray>()
+
+    fun getScreenInfo(){
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        Log.e("vaca", "height: $height, width: $width")
+
+        val mm= Converter.pxToMm(width.toFloat(), this)
+        WaveView.drawSize= (mm/12.5f*125f).toInt()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        customAdapter = CustomAdapter()
-        customAdapter.mCarDataList.clear()
-        mControlNames.forEachIndexed { index, s ->
-            customAdapter.mCarDataList.add(
-                CarData(
-                    s,
-                    mControlIds[index],
-                    null
-                )
-            )
-        }
-        binding.recyclerView.adapter = customAdapter
-        binding.recyclerView.layoutManager =
-            androidx.recyclerview.widget.LinearLayoutManager(this).apply {
-                orientation = androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-            }
+        getScreenInfo()
+
+
         updateSignal.observe(this) {
-            Log.e("vaca", "er2Graph: $it")
             binding.waveView.invalidate()
+        }
+
+        leadStatus.observe(this){
+            binding.leadStatus.text=it
+        }
+
+        ecgData.observe(this){
+            for(k in 0 until it.size){
+               WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
+            }
         }
 
         initAndroidCar()
@@ -69,9 +79,8 @@ class MainActivity : AppCompatActivity() {
             try {
                 WaveView.reset()
                 WaveView.disp = true
-            } catch (e: Exception)
-            {
-                Log.e("vaca","reset error: $e")
+            } catch (e: Exception) {
+                Log.e("vaca", "reset error: $e")
             }
             drawTask = WaveView.Companion.DrawTask()
             Timer().schedule(drawTask, Date(), 32)
@@ -86,37 +95,56 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun initAndroidCar() {
+    private fun initAndroidCar() {
         val car = Car.createCar(this)
         if (car == null) {
+            binding.hint.text = "car is null"
             Log.e("vaca", "car is null")
             return
+        } else {
+            binding.hint.text = "create car success"
+            Log.e("vaca", "car is not null")
         }
         val mCarPropertyManager = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
-        for (i in mControlIds) {
-            mCarPropertyManager.registerCallback(object :
-                CarPropertyManager.CarPropertyEventCallback {
-                override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-                    if (carPropertyValue != null) {
-                        Log.e(
-                            "vaca",
-                            "onchange event id: " + carPropertyValue.propertyId + " value: " + carPropertyValue.value
-                        )
-                        customAdapter.setProperty(
-                            carPropertyValue.propertyId,
-                            carPropertyValue.value
-                        )
-                    } else {
-                        Log.e("vaca", " value: null")
+
+        mCarPropertyManager.registerCallback(object :
+            CarPropertyManager.CarPropertyEventCallback {
+            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+                if (carPropertyValue != null) {
+                    if(carPropertyValue.value is IntArray){
+                        ecgData.postValue(carPropertyValue.value as IntArray)
+                    }else{
+                        binding.hint.text= "value is not int array"
                     }
                 }
+            }
 
-                override fun onErrorEvent(p0: Int, p1: Int) {
+            override fun onErrorEvent(p0: Int, p1: Int) {
 
+            }
+
+        }, propertyID.ID_ECG_VALUE, 10F)
+
+        mCarPropertyManager.registerCallback(object :
+            CarPropertyManager.CarPropertyEventCallback {
+            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+                if (carPropertyValue != null) {
+                    if(carPropertyValue.value is Int){
+                        if(carPropertyValue.value == 1){
+                            leadStatus.postValue("lead off")
+                        }else{
+                            leadStatus.postValue("lead on")
+                        }
+                    }
                 }
+            }
 
-            }, i, 10F)
-        }
+            override fun onErrorEvent(p0: Int, p1: Int) {
+
+            }
+
+        }, propertyID.ID_ECG_LEAD_OFFST, 10F)
+
     }
 
 }

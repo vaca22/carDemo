@@ -1,6 +1,8 @@
 package com.example.cardemo.view
 
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import java.util.LinkedList
 
 object WavePara {
@@ -17,4 +19,6 @@ object WavePara {
     var drawTask: WaveView.Companion.DrawTask? = null
     //模拟发送数据
     var offerTask: WaveView.Companion.OfferTask? = null
+
+    val dataScope = CoroutineScope(Dispatchers.IO)
 }
