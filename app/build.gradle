@@ -4,6 +4,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        vaca {
+            storeFile file('..\\key\\platform.jks')
+            storePassword 'android'
+            keyAlias 'androidplatform'
+            keyPassword 'android'
+        }
+    }
     namespace 'com.example.cardemo'
     compileSdk 33
 
@@ -24,8 +32,12 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.vaca
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.vaca
         }
     }
     compileOptions {

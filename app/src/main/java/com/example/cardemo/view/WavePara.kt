@@ -12,4 +12,7 @@ object WavePara {
     val waveDataX = LinkedList<Float>()
     val er2Graph = MutableLiveData<Boolean>()
 
+
+    var drawTask: WaveView.Companion.DrawTask? = null
+    var offerTask: WaveView.Companion.OfferTask? = null
 }

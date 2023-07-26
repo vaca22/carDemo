@@ -3,9 +3,9 @@ package com.example.cardemo.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.cardemo.R
@@ -69,6 +69,7 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
+                Log.e("vaca","drawTask22")
                 try {
                     do {
                         val gx = waveDataX.poll()
@@ -81,13 +82,27 @@ class WaveView : View {
                     } while (gIndex < pkgsize);
                     gIndex = 0;
                     poss(Er1Draw(g))
+                    Log.e("vaca","drawTask")
                     er2Graph.postValue(true)
                 } catch (e: java.lang.Exception) {
                     waveDataX.clear()
                     gIndex = 0;
+                    e.printStackTrace()
                 }
 
 
+            }
+        }
+
+        class OfferTask() : TimerTask() {
+            var k=0;
+            override fun run() {
+                try {
+                    waveDataX.offer(kotlin.math.sin(k.toDouble()/30).toFloat())
+                    k++
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -168,19 +183,19 @@ class WaveView : View {
     fun Canvas.dr2(){
         for(k in 0 until gauu.size-1){
             this.drawLine(gauu[k].x,gauu[k].y,gauu[k+1].x,gauu[k+1].y,wavePaint)
+            Log.e("vaca","drawLine ${gauu[k].x},${gauu[k].y},${gauu[k+1].x},${gauu[k+1].y}")
         }
     }
 
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        nd=width/drawSize.toFloat()
         canvas.drawARGB(0, 0, 0, 0)
-        val p = Path()
         val baseY = 2.5f*co
         canvas.drawLine(30f, co * 2.5f - realTimeDoubler * co, 30f, co * 2.5f, linePaint)
         canvas.drawText("1mV", 35f, baseY + 35f, timePaint)
         if (disp) {
-            var wavePath = Path()
             for ((index, h) in data.withIndex()) {
                 val h1 = h * realTimeDoubler
                 n2 = judgePoint(index)
@@ -194,7 +209,6 @@ class WaveView : View {
                         canvas.dr2()
                         n1 = 0
                     } else {
-                        wavePath = Path()
                         gauu.clear()
                         gauu.add(
                             PointF(nd * index.toFloat(),

@@ -10,6 +10,12 @@ import com.example.cardemo.databinding.ActivityMainBinding
 import com.example.cardemo.propertyID.mControlIds
 import com.example.cardemo.propertyID.mControlNames
 import com.example.cardemo.view.CustomAdapter
+import com.example.cardemo.view.WavePara.drawTask
+import com.example.cardemo.view.WavePara.er2Graph
+import com.example.cardemo.view.WavePara.offerTask
+import com.example.cardemo.view.WaveView
+import java.util.Date
+import java.util.Timer
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,31 +30,84 @@ class MainActivity : AppCompatActivity() {
 
         customAdapter = CustomAdapter()
         customAdapter.mCarDataList.clear()
-        mControlNames.forEachIndexed { index, s -> customAdapter.mCarDataList.add(CarData(s,mControlIds[index],null)) }
+        mControlNames.forEachIndexed { index, s ->
+            customAdapter.mCarDataList.add(
+                CarData(
+                    s,
+                    mControlIds[index],
+                    null
+                )
+            )
+        }
         binding.recyclerView.adapter = customAdapter
-        binding.recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this).apply {
-            orientation = androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
+        binding.recyclerView.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(this).apply {
+                orientation = androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
+            }
+        er2Graph.observe(this) {
+            Log.e("vaca", "er2Graph: $it")
+            binding.waveView.invalidate()
         }
 
         initAndroidCar()
     }
 
+    override fun onStart() {
+        initEcg()
+        initOfferTask()
+        super.onStart()
+    }
 
-    fun initAndroidCar(){
+    override fun onStop() {
+//        drawTask?.cancel()
+//        drawTask = null
+        super.onStop()
+    }
+
+    private fun initEcg() {
+        if (drawTask == null) {
+            try {
+                WaveView.reset()
+                WaveView.disp = true
+            } catch (e: Exception)
+            {
+                Log.e("vaca","reset error: $e")
+            }
+            drawTask = WaveView.Companion.DrawTask()
+            Timer().schedule(drawTask, Date(), 32)
+        }
+    }
+
+
+    private fun initOfferTask() {
+        if (offerTask == null) {
+            offerTask = WaveView.Companion.OfferTask()
+            Timer().schedule(offerTask, Date(), 8)
+        }
+    }
+
+    fun initAndroidCar() {
         val car = Car.createCar(this)
-        if(car==null){
-            Log.e("vaca","car is null")
+        if (car == null) {
+            Log.e("vaca", "car is null")
             return
         }
         val mCarPropertyManager = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
-        for(i in mControlIds){
-            mCarPropertyManager.registerCallback(object:CarPropertyManager.CarPropertyEventCallback{
+        for (i in mControlIds) {
+            mCarPropertyManager.registerCallback(object :
+                CarPropertyManager.CarPropertyEventCallback {
                 override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-                    if(carPropertyValue!=null){
-                        Log.e("vaca","onchange event id: "+carPropertyValue.propertyId+" value: "+carPropertyValue.value)
-                        customAdapter.setProperty(carPropertyValue.propertyId,carPropertyValue.value)
-                    }else{
-                        Log.e("vaca"," value: null")
+                    if (carPropertyValue != null) {
+                        Log.e(
+                            "vaca",
+                            "onchange event id: " + carPropertyValue.propertyId + " value: " + carPropertyValue.value
+                        )
+                        customAdapter.setProperty(
+                            carPropertyValue.propertyId,
+                            carPropertyValue.value
+                        )
+                    } else {
+                        Log.e("vaca", " value: null")
                     }
                 }
 
@@ -56,7 +115,7 @@ class MainActivity : AppCompatActivity() {
 
                 }
 
-            },i, 10F)
+            }, i, 10F)
         }
     }
 
