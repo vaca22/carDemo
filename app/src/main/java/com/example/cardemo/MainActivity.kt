@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         initEcg()
-        initOfferTask()
+//        initOfferTask()
         super.onStart()
     }
 
