@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.cardemo.R
@@ -26,7 +25,7 @@ class WaveView : View {
             0
         }
 
-        val pkgsize=4
+        val pkgsize = 4
 
         var currentHead = 0
         val headLen = 3
@@ -69,37 +68,29 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
-                Log.e("vaca", "DrawTask")
-                try {
-                    do {
-                        Log.e("vaca", "DrawTask1")
-                        val data = waveDataX.poll()
-                        if (data == null) {
-                            Log.e("vaca", "DrawTask2")
-                            return
-                        } else {
-                            drawPkg[gIndex] = data
-                        }
-                        gIndex++
-                    } while (gIndex < pkgsize);
-                    gIndex = 0;
-                    process(Er1Draw(drawPkg))
-                    updateSignal.postValue(true)
-                } catch (e: java.lang.Exception) {
-                    waveDataX.clear()
-                    gIndex = 0;
-                    e.printStackTrace()
+                for (k in 1..4) {
+                    val data = waveDataX.poll()
+                    if (data == null) {
+                        return
+                    } else {
+                        drawPkg[gIndex] = data
+                    }
+                    gIndex++
+                    if (gIndex >= pkgsize) {
+                        gIndex = 0
+                        process(Er1Draw(drawPkg))
+                        updateSignal.postValue(true)
+                    }
                 }
-
 
             }
         }
 
         class OfferTask() : TimerTask() {
-            var k=0;
+            var k = 0;
             override fun run() {
                 try {
-                    waveDataX.offer(kotlin.math.sin(k.toDouble()/30).toFloat())
+                    waveDataX.offer(kotlin.math.sin(k.toDouble() / 30).toFloat())
                     k++
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
@@ -178,22 +169,34 @@ class WaveView : View {
         }
     }
 
-    private val realDrawPoints=ArrayList<PointF>()
+    private val realDrawPoints = ArrayList<PointF>()
 
 
-    fun Canvas.drawEcg(){
-        for(k in 0 until realDrawPoints.size-1){
-            this.drawLine(realDrawPoints[k].x,realDrawPoints[k].y,realDrawPoints[k+1].x,realDrawPoints[k+1].y,wavePaint)
+    fun Canvas.drawEcg() {
+        for (k in 0 until realDrawPoints.size - 1) {
+            this.drawLine(
+                realDrawPoints[k].x,
+                realDrawPoints[k].y,
+                realDrawPoints[k + 1].x,
+                realDrawPoints[k + 1].y,
+                wavePaint
+            )
         }
     }
 
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        nd=width/drawSize.toFloat()
+        nd = width / drawSize.toFloat()
         canvas.drawARGB(0, 0, 0, 0)
-        val baseY = 2.5f*pixelsPerMv
-        canvas.drawLine(30f, pixelsPerMv * 2.5f - realTimeDoubler * pixelsPerMv, 30f, pixelsPerMv * 2.5f, linePaint)
+        val baseY = 2.5f * pixelsPerMv
+        canvas.drawLine(
+            30f,
+            pixelsPerMv * 2.5f - realTimeDoubler * pixelsPerMv,
+            30f,
+            pixelsPerMv * 2.5f,
+            linePaint
+        )
         canvas.drawText("1mV", 35f, baseY + 35f, timePaint)
         if (disp) {
             for ((index, h) in data.withIndex()) {
@@ -211,16 +214,20 @@ class WaveView : View {
                     } else {
                         realDrawPoints.clear()
                         realDrawPoints.add(
-                            PointF(nd * index.toFloat(),
-                                baseY - h1.toFloat()))
+                            PointF(
+                                nd * index.toFloat(),
+                                baseY - h1.toFloat()
+                            )
+                        )
                         n1 = 1
                     }
                 } else {
                     realDrawPoints.add(
                         PointF(
-                        nd * index.toFloat(),
-                        baseY - h1.toFloat()
-                    ))
+                            nd * index.toFloat(),
+                            baseY - h1.toFloat()
+                        )
+                    )
                 }
 
             }

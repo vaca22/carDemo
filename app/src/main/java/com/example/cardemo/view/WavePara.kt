@@ -3,7 +3,7 @@ package com.example.cardemo.view
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.util.LinkedList
+import java.util.concurrent.ConcurrentLinkedQueue
 
 object WavePara {
     //每毫伏对应的像素点数
@@ -12,7 +12,7 @@ object WavePara {
     var realTimeDoubler=1f
 
 
-    val waveDataX = LinkedList<Float>()
+    val waveDataX = ConcurrentLinkedQueue<Float>()
     val updateSignal = MutableLiveData<Boolean>()
 
 
