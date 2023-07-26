@@ -42,7 +42,7 @@
             android:layout_margin="20dp"
             android:id="@+id/lead_status"
             android:gravity="center"
-            android:text="导联状态"
+            android:text="导联是否脱落：未获取到状态 "
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>

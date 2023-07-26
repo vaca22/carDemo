@@ -113,8 +113,12 @@ class MainActivity : AppCompatActivity() {
                 if (carPropertyValue != null) {
                     if(carPropertyValue.value is IntArray){
                         ecgData.postValue(carPropertyValue.value as IntArray)
+                        var string=""
+                        for(k in 0 until (carPropertyValue.value as IntArray).size){
+                           string+=Er1WaveUtil.byteTomV((carPropertyValue.value as IntArray)[k]).toString()+" "
+                        }
                     }else{
-                        binding.hint.text= "value is not int array"
+                        binding.ecgValue.text= "value is not int array"
                     }
                 }
             }
@@ -131,9 +135,9 @@ class MainActivity : AppCompatActivity() {
                 if (carPropertyValue != null) {
                     if(carPropertyValue.value is Int){
                         if(carPropertyValue.value == 1){
-                            leadStatus.postValue("lead off")
+                            leadStatus.postValue("导联状态：脱落")
                         }else{
-                            leadStatus.postValue("lead on")
+                            leadStatus.postValue("导联状态：正常")
                         }
                     }
                 }
