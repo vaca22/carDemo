@@ -47,6 +47,8 @@ class CustomAdapter() :
             viewHolder.valueView.text = value
         }else if(value==null){
             viewHolder.valueView.text = "null"
+        }else{
+            viewHolder.valueView.text = "receive value"
         }
     }
 
