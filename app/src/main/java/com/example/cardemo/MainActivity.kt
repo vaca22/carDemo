@@ -35,6 +35,10 @@ class MainActivity : AppCompatActivity() {
 
         val mm= Converter.pxToMm(width.toFloat(), this)
         WaveView.drawSize= (mm/12.5f*125f).toInt()
+        WaveView.nd = width.toFloat() / WaveView.drawSize
+        WaveView.data = IntArray(WaveView.drawSize) {
+            0
+        }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

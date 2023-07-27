@@ -11,8 +11,7 @@
         android:elevation="0dp"
         android:id="@+id/bg"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1:1"
+        android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent" />
     <com.example.cardemo.view.WaveView
         android:id="@+id/wave_view"
@@ -22,10 +21,11 @@
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintTop_toTopOf="parent" />
     <LinearLayout
-        app:layout_constraintTop_toBottomOf="@+id/wave_view"
+        android:elevation="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="200dp">
         <TextView
             android:layout_margin="20dp"
             android:id="@+id/hint"

@@ -20,10 +20,8 @@ class WaveView : View {
     companion object {
         var disp = false
         var drawSize = 862
-        var nd = 1280f / drawSize
-        var data = IntArray(drawSize) {
-            0
-        }
+         var nd :Float=0f
+        lateinit var data : IntArray
 
         val pkgsize = 4
 
