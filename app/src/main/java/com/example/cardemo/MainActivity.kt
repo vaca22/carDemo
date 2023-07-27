@@ -10,6 +10,11 @@ import com.example.cardemo.databinding.ActivityMainBinding
 import com.example.cardemo.propertyID.mControlIds
 import com.example.cardemo.propertyID.mControlNames
 import com.example.cardemo.view.CustomAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,7 +51,9 @@ class MainActivity : AppCompatActivity() {
                 override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
                     if(carPropertyValue!=null){
                         Log.e("vaca","onchange event id: "+carPropertyValue.propertyId+" value: "+carPropertyValue.value)
-                        customAdapter.setProperty(carPropertyValue.propertyId,carPropertyValue.value)
+                        MainScope().launch {
+                            customAdapter.setProperty(carPropertyValue.propertyId,carPropertyValue.value)
+                        }
                     }else{
                         Log.e("vaca"," value: null")
                     }
