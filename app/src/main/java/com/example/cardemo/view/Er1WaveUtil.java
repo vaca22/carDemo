@@ -9,7 +9,7 @@ public class Er1WaveUtil {
         if (a == (byte) 0xff && b == (byte) 0x7f)
             return 0f;
         int n = ((a & 0xFF) | (short) (b << 8));
-        return (float) (n * (1.0035 * 1800) / (4096 * 178.74));
+        return (float)(n * 0.0738547929319);
     }
 
     public static float byteTomV2(int src) {
@@ -22,7 +22,7 @@ public class Er1WaveUtil {
             n=0x8000-src;
         }
 
-        return (float) (n * (1.0035 * 1800) / (4096 * 178.74));
+        return (float) (n * 0.0738547929319);
     }
 
     public static float byteTomV3(int src){
@@ -32,12 +32,12 @@ public class Er1WaveUtil {
             src=src^0xffff;
             n=-(src&0x7fff);
         }
-        return (float) (n * (1.0035 * 1800) / (4096 * 178.74));
+        return (float) (n * 0.0738547929319);
     }
 
     public static float byteTomV4(int src){
         int n=src;
 
-        return (float) (n * (1.0035 * 1800) / (4096 * 178.74));
+        return (float) (n * 0.0738547929319);
     }
 }

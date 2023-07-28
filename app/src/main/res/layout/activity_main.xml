@@ -48,6 +48,7 @@
     </LinearLayout>
 
     <Button
+        android:elevation="1000dp"
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,6 +56,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
     <Button
+        android:elevation="1000dp"
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -62,6 +64,7 @@
         app:layout_constraintTop_toBottomOf="@+id/button1"
         app:layout_constraintEnd_toEndOf="parent" />
     <Button
+        android:elevation="1000dp"
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -69,10 +72,82 @@
         app:layout_constraintTop_toBottomOf="@+id/button2"
         app:layout_constraintEnd_toEndOf="parent" />
     <Button
+        android:elevation="1000dp"
         android:id="@+id/button4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="模式四"
         app:layout_constraintTop_toBottomOf="@+id/button3"
         app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.cardview.widget.CardView
+        android:id="@+id/amp2"
+        android:layout_width="195dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="120dp"
+        android:elevation="1000dp"
+        android:visibility="gone"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/reg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.cardview.widget.CardView>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/amp"
+        android:layout_width="195dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="120dp"
+        android:elevation="100dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="增益："
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/amm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="55dp"
+                android:text="10 mm/mV"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="10dp"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/arrow_down"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

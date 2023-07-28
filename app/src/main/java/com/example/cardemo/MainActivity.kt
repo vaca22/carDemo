@@ -6,11 +6,15 @@ import android.car.hardware.property.CarPropertyManager
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.cardemo.databinding.ActivityMainBinding
 import com.example.cardemo.view.Converter
 import com.example.cardemo.view.Er1WaveUtil
+import com.example.cardemo.view.FullEcgAmpAdapter
 import com.example.cardemo.view.WavePara
 import com.example.cardemo.view.WavePara.drawTask
 import com.example.cardemo.view.WavePara.offerTask
@@ -25,7 +29,9 @@ class MainActivity : AppCompatActivity() {
 
     val leadStatus=MutableLiveData<String>()
     val ecgData=MutableLiveData<IntArray>()
-
+    val ampx = arrayOf("1.25 mm/mV","2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
+    val ampn = arrayOf(0.125f,0.25f, 0.5f, 1f, 2f)
+    var currentIndex = 3
     fun getScreenInfo(){
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
@@ -41,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    var mode=1;
+    var mode=3;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -87,12 +93,48 @@ class MainActivity : AppCompatActivity() {
            mode=4
         }
 
+        initAmp()
+
         initAndroidCar()
+    }
+
+    fun initAmp(){
+        val buttonAdapter = FullEcgAmpAdapter(this)
+        val lm = object : LinearLayoutManager(this, RecyclerView.VERTICAL, false) {
+            override fun canScrollHorizontally(): Boolean {
+                return false
+            }
+        }
+        binding.reg.layoutManager = lm
+        buttonAdapter.addAll(ampx)
+        buttonAdapter.setSelect(currentIndex)
+        val updateAmp = MutableLiveData<Int>()
+        updateAmp.observe(this) { u ->
+            WavePara.realTimeDoubler = ampn[u]
+            binding.amm.text = ampx[u]
+            binding.amp2.visibility = View.GONE
+        }
+        binding.amp.setOnClickListener {
+            if (binding.amp2.visibility != View.VISIBLE) {
+                binding.amp2.visibility = View.VISIBLE
+            } else {
+                binding.amp2.visibility = View.GONE
+            }
+        }
+
+        buttonAdapter.myGo = object : FullEcgAmpAdapter.WantInfo {
+            override fun go(u: Int) {
+                updateAmp.postValue(u)
+                Log.e("index", u.toString())
+                currentIndex = u
+            }
+        }
+        binding.reg.adapter = buttonAdapter
     }
 
     override fun onStart() {
         initEcg()
-//        initOfferTask()
+      //  initOfferTask()
         super.onStart()
     }
 
