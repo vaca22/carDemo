@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
             0
         }
     }
+
+    var mode=1;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -59,8 +61,30 @@ class MainActivity : AppCompatActivity() {
 
         ecgData.observe(this){
             for(k in 0 until it.size){
-               WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
+                if(mode==1){
+                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
+                }else if(mode==2){
+                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV2(it[k]))
+                }else if(mode==3){
+                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV3(it[k]))
+                }else if(mode==4){
+                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV4(it[k]))
+                }
+
             }
+        }
+
+        binding.button1.setOnClickListener {
+            mode=1
+        }
+        binding.button2.setOnClickListener {
+            mode=2
+        }
+        binding.button3.setOnClickListener {
+            mode=3
+        }
+        binding.button4.setOnClickListener {
+           mode=4
         }
 
         initAndroidCar()
@@ -121,8 +145,20 @@ class MainActivity : AppCompatActivity() {
                         for(k in 0 until (carPropertyValue.value as IntArray).size){
                            string+=Er1WaveUtil.byteTomV((carPropertyValue.value as IntArray)[k]).toString()+" "
                         }
-                    }else{
-                        binding.ecgValue.text= "value is not int array"
+                    }else if(carPropertyValue.value is Array<*>) {
+                        val temp = carPropertyValue.value as Array<*>
+                        if (temp[0] is Int) {
+                            val intArray2 = IntArray(temp.size) {
+                                temp[it] as Int
+                            }
+                            ecgData.postValue(intArray2)
+                        }
+                    }
+                    else{
+                        //print the type of carPropertyValue.value
+
+
+                        binding.ecgValue.text= "value is not int array, "+carPropertyValue.value.javaClass.name
                     }
                 }
             }
