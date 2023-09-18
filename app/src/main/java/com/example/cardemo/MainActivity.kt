@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         initEcg()
-      //  initOfferTask()
+        initOfferTask()
         super.onStart()
     }
 
@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                 WaveView.reset()
                 WaveView.disp = true
             } catch (e: Exception) {
-                Log.e("vaca", "reset error: $e")
+
             }
             drawTask = WaveView.Companion.DrawTask()
             Timer().schedule(drawTask, Date(), 32)
