@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity,"正在上传",Toast.LENGTH_SHORT).show()
                     }
                     try {
-                        val str=NetUtils.postFile("http://192.168.6.109:9889/ecg_file", file);
+                        val str=NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
                         withContext(Dispatchers.Main){
                             Toast.makeText(this@MainActivity,"上传成功",Toast.LENGTH_SHORT).show()
                         }
