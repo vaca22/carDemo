@@ -7,6 +7,7 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import com.example.cardemo.MainActivity
 import com.example.cardemo.R
 import com.example.cardemo.view.WavePara.pixelsPerMv
 import com.example.cardemo.view.WavePara.realTimeDoubler
@@ -88,7 +89,10 @@ class WaveView : View {
             var k = 0;
             override fun run() {
                 try {
-                    waveDataX.offer(kotlin.math.sin(k.toDouble() / 30).toFloat())
+                    val data=(kotlin.math.sin(k.toDouble() / 30).toFloat()/ 0.0738547929319).toInt()
+                    val array= intArrayOf(data)
+                    MainActivity.ecgData.postValue(array)
+//                    waveDataX.offer(kotlin.math.sin(k.toDouble() / 30).toFloat())
                     k++
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()

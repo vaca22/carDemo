@@ -25,23 +25,30 @@ import com.example.cardemo.view.WavePara.drawTask
 import com.example.cardemo.view.WavePara.offerTask
 import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WaveView
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.lang.Thread.sleep
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Date
 import java.util.Timer
 
 class MainActivity : AppCompatActivity() {
-
+    companion object{
+        val ecgData = MutableLiveData<IntArray>()
+    }
+    val dataScope = CoroutineScope(Dispatchers.IO)
     private lateinit var binding: ActivityMainBinding
 
     val leadStatus = MutableLiveData<String>()
-    val ecgData = MutableLiveData<IntArray>()
+
     val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
     val ampn = arrayOf(0.125f, 0.25f, 0.5f, 1f, 2f)
     var currentIndex = 3
-    fun getScreenInfo() {
+    private fun getScreenInfo() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         val height = displayMetrics.heightPixels
@@ -81,14 +88,15 @@ class MainActivity : AppCompatActivity() {
         var status = 0
 
         ecgData.observe(this) {
+
+
+            for (k in 0 until it.size) {
+                WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
+            }
             if(status==1){
                 for (k in 0 until it.size) {
                     ecgArray.add(it[k].toShort())
                 }
-            }
-
-            for (k in 0 until it.size) {
-                WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
             }
         }
 
@@ -99,10 +107,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.start.setOnClickListener {
             if (status == 0) {
+                ecgArray.clear()
                 status = 1
                 binding.start.text = "停止录制"
                 binding.status.text = "正在录制"
-                ecgArray.clear()
+
             } else {
                 status = 0
                 binding.start.text = "开始录制"
@@ -112,17 +121,23 @@ class MainActivity : AppCompatActivity() {
                    byteBuffer.putShort(ecgArray[k])
                 }
                 val timeString=java.text.SimpleDateFormat("yyyyMMddHHmmss").format(java.util.Date())+".dat"
-                val file=File(PathUtil.getPathX(timeString))
-                file.writeBytes(byteBuffer.array())
-                Thread{
+                Log.e("vaca",timeString);
+                dataScope.launch{
+                    Log.e("vaca",timeString);
+                    sleep(100)
+                    val file=File(PathUtil.getPathX(timeString))
+                    file.writeBytes(byteBuffer.array())
+                   withContext(Dispatchers.Main){
+                        Toast.makeText(this@MainActivity,"正在上传",Toast.LENGTH_SHORT).show()
+                    }
                     try {
-                        val str=NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
-                        MainScope().run {
-                            Toast.makeText(this@MainActivity,"上传成功",Toast.LENGTH_LONG).show()
+                        val str=NetUtils.postFile("http://192.168.6.109:9889/ecg_file", file);
+                        withContext(Dispatchers.Main){
+                            Toast.makeText(this@MainActivity,"上传成功",Toast.LENGTH_SHORT).show()
                         }
                     }catch (e:Exception){
-                        MainScope().run {
-                            Toast.makeText(this@MainActivity,"上传失败",Toast.LENGTH_LONG).show()
+                        withContext(Dispatchers.Main){
+                            Toast.makeText(this@MainActivity,"上传失败",Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -173,7 +188,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         initEcg()
-//        initOfferTask()
+        initOfferTask()
         super.onStart()
     }
 
