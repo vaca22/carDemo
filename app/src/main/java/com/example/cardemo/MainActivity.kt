@@ -27,27 +27,27 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    val leadStatus=MutableLiveData<String>()
-    val ecgData=MutableLiveData<IntArray>()
-    val ampx = arrayOf("1.25 mm/mV","2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
-    val ampn = arrayOf(0.125f,0.25f, 0.5f, 1f, 2f)
+    val leadStatus = MutableLiveData<String>()
+    val ecgData = MutableLiveData<IntArray>()
+    val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
+    val ampn = arrayOf(0.125f, 0.25f, 0.5f, 1f, 2f)
     var currentIndex = 3
-    fun getScreenInfo(){
+    fun getScreenInfo() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         val height = displayMetrics.heightPixels
         val width = displayMetrics.widthPixels
         Log.e("vaca", "height: $height, width: $width")
 
-        val mm= Converter.pxToMm(width.toFloat(), this)
-        WaveView.drawSize= (mm/12.5f*125f).toInt()
+        val mm = Converter.pxToMm(width.toFloat(), this)
+        WaveView.drawSize = (mm / 12.5f * 125f).toInt()
         WaveView.nd = width.toFloat() / WaveView.drawSize
         WaveView.data = IntArray(WaveView.drawSize) {
             0
         }
     }
 
-    var mode=3;
+    var mode = 1;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -61,44 +61,40 @@ class MainActivity : AppCompatActivity() {
             binding.waveView.invalidate()
         }
 
-        leadStatus.observe(this){
-            binding.leadStatus.text=it
+        leadStatus.observe(this) {
+            binding.leadStatus.text = it
         }
 
-        ecgData.observe(this){
-            for(k in 0 until it.size){
-                if(mode==1){
-                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
-                }else if(mode==2){
-                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV2(it[k]))
-                }else if(mode==3){
-                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV3(it[k]))
-                }else if(mode==4){
-                    WavePara.waveDataX.offer(Er1WaveUtil.byteTomV4(it[k]))
-                }
-
+        ecgData.observe(this) {
+            for (k in 0 until it.size) {
+                WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
             }
         }
 
-        binding.button1.setOnClickListener {
-            mode=1
+        var status = 0
+
+        binding.start.text = "开始录制"
+        binding.status.text = "未录制"
+
+        binding.start.setOnClickListener {
+            if (status == 0) {
+                status = 1
+                binding.start.text = "停止录制"
+                binding.status.text = "正在录制"
+            } else {
+                status = 0
+                binding.start.text = "开始录制"
+                binding.status.text = "未录制"
+            }
+
         }
-        binding.button2.setOnClickListener {
-            mode=2
-        }
-        binding.button3.setOnClickListener {
-            mode=3
-        }
-        binding.button4.setOnClickListener {
-           mode=4
-        }
+
 
         initAmp()
-
         initAndroidCar()
     }
 
-    fun initAmp(){
+    fun initAmp() {
         val buttonAdapter = FullEcgAmpAdapter(this)
         val lm = object : LinearLayoutManager(this, RecyclerView.VERTICAL, false) {
             override fun canScrollHorizontally(): Boolean {
@@ -134,7 +130,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         initEcg()
-        initOfferTask()
+//        initOfferTask()
         super.onStart()
     }
 
@@ -181,13 +177,14 @@ class MainActivity : AppCompatActivity() {
             CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
                 if (carPropertyValue != null) {
-                    if(carPropertyValue.value is IntArray){
+                    if (carPropertyValue.value is IntArray) {
                         ecgData.postValue(carPropertyValue.value as IntArray)
-                        var string=""
-                        for(k in 0 until (carPropertyValue.value as IntArray).size){
-                           string+=Er1WaveUtil.byteTomV((carPropertyValue.value as IntArray)[k]).toString()+" "
+                        var string = ""
+                        for (k in 0 until (carPropertyValue.value as IntArray).size) {
+                            string += Er1WaveUtil.byteTomV((carPropertyValue.value as IntArray)[k])
+                                .toString() + " "
                         }
-                    }else if(carPropertyValue.value is Array<*>) {
+                    } else if (carPropertyValue.value is Array<*>) {
                         val temp = carPropertyValue.value as Array<*>
                         if (temp[0] is Int) {
                             val intArray2 = IntArray(temp.size) {
@@ -195,12 +192,12 @@ class MainActivity : AppCompatActivity() {
                             }
                             ecgData.postValue(intArray2)
                         }
-                    }
-                    else{
+                    } else {
                         //print the type of carPropertyValue.value
 
 
-                        binding.ecgValue.text= "value is not int array, "+carPropertyValue.value.javaClass.name
+                        binding.ecgValue.text =
+                            "value is not int array, " + carPropertyValue.value.javaClass.name
                     }
                 }
             }
@@ -215,10 +212,10 @@ class MainActivity : AppCompatActivity() {
             CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
                 if (carPropertyValue != null) {
-                    if(carPropertyValue.value is Int){
-                        if(carPropertyValue.value == 1){
+                    if (carPropertyValue.value is Int) {
+                        if (carPropertyValue.value == 1) {
                             leadStatus.postValue("导联状态：脱落")
-                        }else{
+                        } else {
                             leadStatus.postValue("导联状态：正常")
                         }
                     }

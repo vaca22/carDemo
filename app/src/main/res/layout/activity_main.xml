@@ -47,38 +47,26 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <Button
-        android:elevation="1000dp"
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="模式一"
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_margin="10dp"
+        android:textSize="22sp"
+        android:textColor="@color/black"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
     <Button
+        android:layout_marginTop="60dp"
         android:elevation="1000dp"
-        android:id="@+id/button2"
+        android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="模式二"
-        app:layout_constraintTop_toBottomOf="@+id/button1"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <Button
-        android:elevation="1000dp"
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="模式三"
-        app:layout_constraintTop_toBottomOf="@+id/button2"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <Button
-        android:elevation="1000dp"
-        android:id="@+id/button4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="模式四"
-        app:layout_constraintTop_toBottomOf="@+id/button3"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:text="开始录制"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/amp2"
         android:layout_width="195dp"
