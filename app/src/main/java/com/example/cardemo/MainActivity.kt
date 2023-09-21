@@ -94,9 +94,12 @@ class MainActivity : AppCompatActivity() {
                 WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
             }
             if(status==1){
-                for (k in 0 until it.size) {
-                    ecgArray.add(it[k].toShort())
+                dataScope.launch {
+                    for (k in 0 until it.size) {
+                        ecgArray.add(it[k].toShort())
+                    }
                 }
+
             }
         }
 
