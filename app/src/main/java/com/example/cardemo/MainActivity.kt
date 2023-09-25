@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     val leadStatus = MutableLiveData<String>()
 
-    val msgCounter = MutableLiveData<Int>()
+    val msgCounter = MutableLiveData<String>()
 
     val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
     val ampn = arrayOf(0.125f, 0.25f, 0.5f, 1f, 2f)
@@ -133,14 +133,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 val timeString =
                     java.text.SimpleDateFormat("yyyyMMddHHmmss").format(java.util.Date()) + ".dat"
-                val couterString=timeString.replace(".dat",".txt")
+                val couterString = timeString.replace(".dat", ".txt")
                 dataScope.launch {
                     sleep(100)
                     val file = File(PathUtil.getPathX(timeString))
                     file.writeBytes(byteBuffer.array())
 
-                    val fileCounter=File(PathUtil.getPathX(couterString))
-                    for(k in 0 until msgCounterArray.size){
+                    val fileCounter = File(PathUtil.getPathX(couterString))
+                    for (k in 0 until msgCounterArray.size) {
                         fileCounter.appendText("${msgCounterArray[k]}\n")
                     }
 
@@ -148,8 +148,8 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, "正在上传", Toast.LENGTH_SHORT).show()
                     }
                     try {
-                        val str = NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
-                        NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", fileCounter);
+                       val str = NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
+                       // NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", fileCounter);
                         withContext(Dispatchers.Main) {
                             Toast.makeText(this@MainActivity, "上传成功", Toast.LENGTH_SHORT).show()
                         }
@@ -258,13 +258,13 @@ class MainActivity : AppCompatActivity() {
                         val intArray2 = IntArray(temp.size) {
                             temp[it] as Int
                         }
-                        dataScope.launch {
-                            if (status == 1) {
-                                for (k in 0 until intArray2.size) {
-                                    ecgArray.add(intArray2[k].toShort())
-                                }
+
+                        if (status == 1) {
+                            for (k in 0 until intArray2.size) {
+                                ecgArray.add(intArray2[k].toShort())
                             }
                         }
+
 
                         ecgData.postValue(intArray2)
                     }
@@ -299,12 +299,29 @@ class MainActivity : AppCompatActivity() {
 
 //        ID_ECG_MSG_COUNTER
 
+        var last=-1;
         mCarPropertyManager.registerCallback(object :
             CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
                 if (carPropertyValue != null) {
                     if (carPropertyValue.value is Int) {
-                        msgCounter.postValue(carPropertyValue.value as Int)
+
+                        if(last==-1){
+                            last=carPropertyValue.value as Int
+                        }else{
+                            last=(last+1)%16
+                            if(last!=(carPropertyValue.value as Int)){
+                                msgCounter.postValue("丢数据了")
+                            }
+                            last=carPropertyValue.value as Int
+                        }
+
+
+
+
+
+
+
                         msgCounterArray.add(carPropertyValue.value as Int)
                     }
                 }
