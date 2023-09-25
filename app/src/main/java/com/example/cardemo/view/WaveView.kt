@@ -92,6 +92,8 @@ class WaveView : View {
                     val data=(kotlin.math.sin(k.toDouble() / 30).toFloat()/ 0.0738547929319).toInt()
                     val array= intArrayOf(data)
                     MainActivity.ecgData.postValue(array)
+
+
 //                    waveDataX.offer(kotlin.math.sin(k.toDouble() / 30).toFloat())
                     k++
                 } catch (e: java.lang.Exception) {

@@ -37,13 +37,16 @@ import java.util.Date
 import java.util.Timer
 
 class MainActivity : AppCompatActivity() {
-    companion object{
+    companion object {
         val ecgData = MutableLiveData<IntArray>()
     }
+
     val dataScope = CoroutineScope(Dispatchers.IO)
     private lateinit var binding: ActivityMainBinding
 
     val leadStatus = MutableLiveData<String>()
+
+    val msgCounter = MutableLiveData<Int>()
 
     val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
     val ampn = arrayOf(0.125f, 0.25f, 0.5f, 1f, 2f)
@@ -62,11 +65,17 @@ class MainActivity : AppCompatActivity() {
             0
         }
     }
+
     private fun intToIp(paramInt: Int): String {
-        return ((paramInt.and(255)).toString() + "." + (paramInt.shr(8).and(255)) + "." + (paramInt.shr(16).and(255)) + "."
+        return ((paramInt.and(255)).toString() + "." + (paramInt.shr(8)
+            .and(255)) + "." + (paramInt.shr(16).and(255)) + "."
                 + (paramInt.shr(24).and(255)))
     }
-    var ecgArray:ArrayList<Short> = ArrayList()
+
+    var ecgArray: ArrayList<Short> = ArrayList()
+    var msgCounterArray: ArrayList<Int> = ArrayList()
+
+    var status = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -75,6 +84,10 @@ class MainActivity : AppCompatActivity() {
 
         PathUtil.initVar(this)
         getScreenInfo()
+
+        msgCounter.observe(this) {
+            binding.msgCounter.text = "msgCounter: $it"
+        }
 
 
         updateSignal.observe(this) {
@@ -85,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             binding.leadStatus.text = it
         }
 
-        var status = 0
+
 
         ecgData.observe(this) {
 
@@ -93,14 +106,7 @@ class MainActivity : AppCompatActivity() {
             for (k in 0 until it.size) {
                 WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
             }
-            if(status==1){
-                dataScope.launch {
-                    for (k in 0 until it.size) {
-                        ecgArray.add(it[k].toShort())
-                    }
-                }
 
-            }
         }
 
 
@@ -110,6 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.start.setOnClickListener {
             if (status == 0) {
+                msgCounterArray.clear()
                 ecgArray.clear()
                 status = 1
                 binding.start.text = "停止录制"
@@ -119,36 +126,44 @@ class MainActivity : AppCompatActivity() {
                 status = 0
                 binding.start.text = "开始录制"
                 binding.status.text = "未录制"
-                val byteBuffer= ByteBuffer.allocate(2*ecgArray.size).order(ByteOrder.LITTLE_ENDIAN)
-                for(k in 0 until ecgArray.size){
-                   byteBuffer.putShort(ecgArray[k])
+                val byteBuffer =
+                    ByteBuffer.allocate(2 * ecgArray.size).order(ByteOrder.LITTLE_ENDIAN)
+                for (k in 0 until ecgArray.size) {
+                    byteBuffer.putShort(ecgArray[k])
                 }
-                val timeString=java.text.SimpleDateFormat("yyyyMMddHHmmss").format(java.util.Date())+".dat"
-                Log.e("vaca",timeString);
-                dataScope.launch{
-                    Log.e("vaca",timeString);
+                val timeString =
+                    java.text.SimpleDateFormat("yyyyMMddHHmmss").format(java.util.Date()) + ".dat"
+                val couterString=timeString.replace(".dat",".txt")
+                dataScope.launch {
                     sleep(100)
-                    val file=File(PathUtil.getPathX(timeString))
+                    val file = File(PathUtil.getPathX(timeString))
                     file.writeBytes(byteBuffer.array())
-                   withContext(Dispatchers.Main){
-                        Toast.makeText(this@MainActivity,"正在上传",Toast.LENGTH_SHORT).show()
+
+                    val fileCounter=File(PathUtil.getPathX(couterString))
+                    for(k in 0 until msgCounterArray.size){
+                        fileCounter.appendText("${msgCounterArray[k]}\n")
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "正在上传", Toast.LENGTH_SHORT).show()
                     }
                     try {
-                        val str=NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
-                        withContext(Dispatchers.Main){
-                            Toast.makeText(this@MainActivity,"上传成功",Toast.LENGTH_SHORT).show()
+                        val str = NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
+                        NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", fileCounter);
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@MainActivity, "上传成功", Toast.LENGTH_SHORT).show()
                         }
-                    }catch (e:Exception){
-                        withContext(Dispatchers.Main){
-                            Toast.makeText(this@MainActivity,"上传失败",Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@MainActivity, "上传失败", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             }
 
         }
-        val wifiManager =getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val gate=intToIp(wifiManager.dhcpInfo.ipAddress)
+        val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val gate = intToIp(wifiManager.dhcpInfo.ipAddress)
         binding.status.text = gate
 
         initAmp()
@@ -191,7 +206,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         initEcg()
-        initOfferTask()
+//        initOfferTask()
         super.onStart()
     }
 
@@ -238,27 +253,20 @@ class MainActivity : AppCompatActivity() {
             CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
                 if (carPropertyValue != null) {
-                    if (carPropertyValue.value is IntArray) {
-                        ecgData.postValue(carPropertyValue.value as IntArray)
-                        var string = ""
-                        for (k in 0 until (carPropertyValue.value as IntArray).size) {
-                            string += Er1WaveUtil.byteTomV((carPropertyValue.value as IntArray)[k])
-                                .toString() + " "
-                        }
-                    } else if (carPropertyValue.value is Array<*>) {
+                    if (carPropertyValue.value is Array<*>) {
                         val temp = carPropertyValue.value as Array<*>
-                        if (temp[0] is Int) {
-                            val intArray2 = IntArray(temp.size) {
-                                temp[it] as Int
-                            }
-                            ecgData.postValue(intArray2)
+                        val intArray2 = IntArray(temp.size) {
+                            temp[it] as Int
                         }
-                    } else {
-                        //print the type of carPropertyValue.value
+                        dataScope.launch {
+                            if (status == 1) {
+                                for (k in 0 until intArray2.size) {
+                                    ecgArray.add(intArray2[k].toShort())
+                                }
+                            }
+                        }
 
-
-                        binding.ecgValue.text =
-                            "value is not int array, " + carPropertyValue.value.javaClass.name
+                        ecgData.postValue(intArray2)
                     }
                 }
             }
@@ -288,6 +296,25 @@ class MainActivity : AppCompatActivity() {
             }
 
         }, propertyID.ID_ECG_LEAD_OFFST, 10F)
+
+//        ID_ECG_MSG_COUNTER
+
+        mCarPropertyManager.registerCallback(object :
+            CarPropertyManager.CarPropertyEventCallback {
+            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+                if (carPropertyValue != null) {
+                    if (carPropertyValue.value is Int) {
+                        msgCounter.postValue(carPropertyValue.value as Int)
+                        msgCounterArray.add(carPropertyValue.value as Int)
+                    }
+                }
+            }
+
+            override fun onErrorEvent(p0: Int, p1: Int) {
+
+            }
+
+        }, propertyID.ID_ECG_MSG_COUNTER, 10F)
 
     }
 
