@@ -268,7 +268,7 @@ class MainActivity : AppCompatActivity() {
 
                         msgCounterArray.add(intArray2.size)
                         if (status == 1) {
-                            val currentTimeMillis = System.currentTimeMillis()
+                            val currentTimeMillis = System.nanoTime()/1000
                             recordFile?.appendText("$currentTimeMillis:")
                             for(k in 0 until intArray2.size){
                                 recordFile?.appendText("${intArray2[k]},")
