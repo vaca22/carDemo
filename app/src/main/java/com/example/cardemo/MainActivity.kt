@@ -48,6 +48,8 @@ class MainActivity : AppCompatActivity() {
 
     val msgCounter = MutableLiveData<String>()
 
+    var recordFile: File? = null
+
     val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
     val ampn = arrayOf(0.125f, 0.25f, 0.5f, 1f, 2f)
     var currentIndex = 3
@@ -71,6 +73,8 @@ class MainActivity : AppCompatActivity() {
             .and(255)) + "." + (paramInt.shr(16).and(255)) + "."
                 + (paramInt.shr(24).and(255)))
     }
+
+
 
     var ecgArray: ArrayList<Short> = ArrayList()
     var msgCounterArray: ArrayList<Int> = ArrayList()
@@ -118,6 +122,7 @@ class MainActivity : AppCompatActivity() {
             if (status == 0) {
                 msgCounterArray.clear()
                 ecgArray.clear()
+                recordFile=File(PathUtil.getPathX("record.txt"))
                 status = 1
                 binding.start.text = "停止录制"
                 binding.status.text = "正在录制"
@@ -258,8 +263,17 @@ class MainActivity : AppCompatActivity() {
                         val intArray2 = IntArray(temp.size) {
                             temp[it] as Int
                         }
+                        Log.e("vaca", "ecg: ${intArray2.size}")
 
+
+                        msgCounterArray.add(intArray2.size)
                         if (status == 1) {
+                            val currentTimeMillis = System.currentTimeMillis()
+                            recordFile?.appendText("$currentTimeMillis:")
+                            for(k in 0 until intArray2.size){
+                                recordFile?.appendText("${intArray2[k]},")
+                            }
+                            recordFile?.appendText("\n")
                             for (k in 0 until intArray2.size) {
                                 ecgArray.add(intArray2[k].toShort())
                             }
@@ -321,8 +335,8 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
-                        msgCounterArray.add(carPropertyValue.value as Int)
+//
+//                        msgCounterArray.add(carPropertyValue.value as Int)
                     }
                 }
             }
