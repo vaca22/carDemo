@@ -268,12 +268,11 @@ class MainActivity : AppCompatActivity() {
 
                         msgCounterArray.add(intArray2.size)
                         if (status == 1) {
-                            val currentTimeMillis = System.nanoTime()/1000
-                            recordFile?.appendText("$currentTimeMillis:")
+                            var string=""
                             for(k in 0 until intArray2.size){
-                                recordFile?.appendText("${intArray2[k]},")
+                                string+=intArray2[k].toString()+","
                             }
-                            recordFile?.appendText("\n")
+                            Log.i("ecg_info",string);
                             for (k in 0 until intArray2.size) {
                                 ecgArray.add(intArray2[k].toShort())
                             }
