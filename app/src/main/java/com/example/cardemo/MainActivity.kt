@@ -263,23 +263,37 @@ class MainActivity : AppCompatActivity() {
                         val intArray2 = IntArray(temp.size) {
                             temp[it] as Int
                         }
-                        Log.e("vaca", "ecg: ${intArray2.size}")
+                        //move intArray2 last  3 number to first
+                        //create new intArray3
+                        val intArray3 = IntArray(intArray2.size) {
+                            0
+                        }
+                        //move intArray2 last  3 number to first
+                        for (k in 0 until intArray2.size - 3) {
+                            intArray3[k+3] = intArray2[k]
+                        }
+                        for (k in 0 until 3) {
+                            intArray3[k] = intArray2[intArray2.size - 3 + k]
+                        }
 
 
-                        msgCounterArray.add(intArray2.size)
+                        Log.e("vaca", "ecg: ${intArray3.size}")
+
+
+                        msgCounterArray.add(intArray3.size)
                         if (status == 1) {
                             var string=""
-                            for(k in 0 until intArray2.size){
-                                string+=intArray2[k].toString()+","
+                            for(k in 0 until intArray3.size){
+                                string+=intArray3[k].toString()+","
                             }
                             Log.i("ecg_info",string);
-                            for (k in 0 until intArray2.size) {
-                                ecgArray.add(intArray2[k].toShort())
+                            for (k in 0 until intArray3.size) {
+                                ecgArray.add(intArray3[k].toShort())
                             }
                         }
 
 
-                        ecgData.postValue(intArray2)
+                        ecgData.postValue(intArray3)
                     }
                 }
             }
