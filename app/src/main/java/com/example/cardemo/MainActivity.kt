@@ -107,13 +107,13 @@ class MainActivity : AppCompatActivity() {
 
 
         //update msgCounter every 1s
-        Timer().schedule(object : java.util.TimerTask() {
-            override fun run() {
-                msgCounter.postValue("receive: $receiveCount, display: $displayCount")
-                receiveCount=0;
-                displayCount=0;
-            }
-        }, 1000, 12000)
+//        Timer().schedule(object : java.util.TimerTask() {
+//            override fun run() {
+//                msgCounter.postValue("receive: $receiveCount, display: $displayCount")
+//                receiveCount=0;
+//                displayCount=0;
+//            }
+//        }, 1000, 12000)
 
 
         ecgData.observe(this) {
