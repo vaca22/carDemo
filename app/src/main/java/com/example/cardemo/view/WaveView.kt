@@ -67,20 +67,40 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
-                for (k in 1..4) {
-                    val data = waveDataX.poll()
-                    if (data == null) {
-                        return
-                    } else {
-                        drawPkg[gIndex] = data
+                if(waveDataX.size>40){
+                    for (k in 1..6) {
+                        val data = waveDataX.poll()
+                        if (data == null) {
+                            return
+                        } else {
+                            MainActivity.displayCount++
+                            drawPkg[gIndex] = data
+                        }
+                        gIndex++
+                        if (gIndex >= pkgsize) {
+                            gIndex = 0
+                            process(Er1Draw(drawPkg))
+                            updateSignal.postValue(true)
+                        }
                     }
-                    gIndex++
-                    if (gIndex >= pkgsize) {
-                        gIndex = 0
-                        process(Er1Draw(drawPkg))
-                        updateSignal.postValue(true)
+                }else{
+                    for (k in 1..4) {
+                        val data = waveDataX.poll()
+                        if (data == null) {
+                            return
+                        } else {
+                            MainActivity.displayCount++
+                            drawPkg[gIndex] = data
+                        }
+                        gIndex++
+                        if (gIndex >= pkgsize) {
+                            gIndex = 0
+                            process(Er1Draw(drawPkg))
+                            updateSignal.postValue(true)
+                        }
                     }
                 }
+
 
             }
         }

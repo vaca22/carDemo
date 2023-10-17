@@ -38,6 +38,9 @@ import java.util.Timer
 
 class MainActivity : AppCompatActivity() {
     companion object {
+        var displayCount=0;
+        var receiveCount=0;
+
         val ecgData = MutableLiveData<IntArray>()
     }
 
@@ -102,6 +105,15 @@ class MainActivity : AppCompatActivity() {
             binding.leadStatus.text = it
         }
 
+
+        //update msgCounter every 1s
+        Timer().schedule(object : java.util.TimerTask() {
+            override fun run() {
+                msgCounter.postValue("receive: $receiveCount, display: $displayCount")
+                receiveCount=0;
+                displayCount=0;
+            }
+        }, 1000, 12000)
 
 
         ecgData.observe(this) {
@@ -230,7 +242,7 @@ class MainActivity : AppCompatActivity() {
 
             }
             drawTask = WaveView.Companion.DrawTask()
-            Timer().schedule(drawTask, Date(), 32)
+            Timer().scheduleAtFixedRate(drawTask, Date(), 32)
         }
     }
 
@@ -292,6 +304,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
+                        receiveCount+=15;
 
                         ecgData.postValue(intArray3)
                     }
