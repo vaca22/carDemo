@@ -150,23 +150,16 @@ class MainActivity : AppCompatActivity() {
                 }
                 val timeString =
                     java.text.SimpleDateFormat("yyyyMMddHHmmss").format(java.util.Date()) + ".dat"
-                val couterString = timeString.replace(".dat", ".txt")
+
                 dataScope.launch {
                     sleep(100)
                     val file = File(PathUtil.getPathX(timeString))
                     file.writeBytes(byteBuffer.array())
-
-                    val fileCounter = File(PathUtil.getPathX(couterString))
-                    for (k in 0 until msgCounterArray.size) {
-                        fileCounter.appendText("${msgCounterArray[k]}\n")
-                    }
-
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@MainActivity, "正在上传", Toast.LENGTH_SHORT).show()
                     }
                     try {
                        val str = NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
-                       // NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", fileCounter);
                         withContext(Dispatchers.Main) {
                             Toast.makeText(this@MainActivity, "上传成功", Toast.LENGTH_SHORT).show()
                         }
