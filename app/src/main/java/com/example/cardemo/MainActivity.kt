@@ -22,7 +22,7 @@ import com.example.cardemo.view.Er1WaveUtil
 import com.example.cardemo.view.FullEcgAmpAdapter
 import com.example.cardemo.view.WavePara
 import com.example.cardemo.view.WavePara.drawTask
-import com.example.cardemo.view.WavePara.offerTask
+
 import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WaveView
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         var displayCount=0;
         var receiveCount=0;
 
-        val ecgData = MutableLiveData<IntArray>()
+
     }
 
     val dataScope = CoroutineScope(Dispatchers.IO)
@@ -116,14 +116,7 @@ class MainActivity : AppCompatActivity() {
 //        }, 1000, 12000)
 
 
-        ecgData.observe(this) {
 
-
-            for (k in 0 until it.size) {
-                WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(it[k]))
-            }
-
-        }
 
 
 
@@ -247,12 +240,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun initOfferTask() {
-        if (offerTask == null) {
-            offerTask = WaveView.Companion.OfferTask()
-            Timer().schedule(offerTask, Date(), 8)
-        }
-    }
+
 
     private fun initAndroidCar() {
         val car = Car.createCar(this)
@@ -306,7 +294,10 @@ class MainActivity : AppCompatActivity() {
 
                         receiveCount+=15;
 
-                        ecgData.postValue(intArray3)
+
+                        for (k in 0 until intArray3.size) {
+                            WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(intArray3[k]))
+                        }
                     }
                 }
             }

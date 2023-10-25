@@ -18,7 +18,7 @@ object WavePara {
 
     var drawTask: WaveView.Companion.DrawTask? = null
     //模拟发送数据
-    var offerTask: WaveView.Companion.OfferTask? = null
+
 
     val dataScope = CoroutineScope(Dispatchers.IO)
 }
