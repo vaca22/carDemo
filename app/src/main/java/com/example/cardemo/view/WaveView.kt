@@ -38,7 +38,7 @@ class WaveView : View {
 
         fun reset() {
             waveDataX.clear()
-            if(data!=null){
+            if (data != null) {
                 for (k in 0 until data!!.size) {
                     data!![k] = 0
                 }
@@ -70,7 +70,7 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
-                if(WaveView.data==null){
+                if (WaveView.data == null) {
                     return
                 }
                 if (waveDataX.size > 40) {
@@ -210,12 +210,12 @@ class WaveView : View {
 
         nd = width / drawSize.toFloat()
         canvas.drawARGB(0, 0, 0, 0)
-        val baseY = 2.5f * pixelsPerMv
+        val baseY = 5f * pixelsPerMv
         canvas.drawLine(
             30f,
-            pixelsPerMv * 2.5f - realTimeDoubler * pixelsPerMv,
+            baseY - realTimeDoubler * pixelsPerMv,
             30f,
-            pixelsPerMv * 2.5f,
+            baseY,
             linePaint
         )
         canvas.drawText("1mV", 35f, baseY + 35f, timePaint)
