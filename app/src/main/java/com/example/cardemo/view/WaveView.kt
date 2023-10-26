@@ -20,9 +20,10 @@ class WaveView : View {
 
     companion object {
         var disp = false
+        val speed = 12.5f  //12.5mm/s
         var drawSize = 862
-         var nd :Float=0f
-        lateinit var data : IntArray
+        var nd: Float = 0f
+        lateinit var data: IntArray
 
         val pkgsize = 4
 
@@ -67,7 +68,7 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
-                if(waveDataX.size>40){
+                if (waveDataX.size > 40) {
                     for (k in 1..6) {
                         val data = waveDataX.poll()
                         if (data == null) {
@@ -83,7 +84,7 @@ class WaveView : View {
                             updateSignal.postValue(true)
                         }
                     }
-                }else{
+                } else {
                     for (k in 1..4) {
                         val data = waveDataX.poll()
                         if (data == null) {
@@ -104,8 +105,6 @@ class WaveView : View {
 
             }
         }
-
-
 
 
     }
@@ -196,6 +195,14 @@ class WaveView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        val screen_mm_width = Er1WaveUtil.convertPx2MM(context, width.toFloat())
+        val time = screen_mm_width / speed
+        drawSize = (time * 125).toInt();
+        WaveView.nd = width.toFloat() / WaveView.drawSize
+        WaveView.data = IntArray(WaveView.drawSize) {
+            0
+        }
+
         nd = width / drawSize.toFloat()
         canvas.drawARGB(0, 0, 0, 0)
         val baseY = 2.5f * pixelsPerMv

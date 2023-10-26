@@ -64,11 +64,7 @@ class MainActivity : AppCompatActivity() {
         Log.e("vaca", "height: $height, width: $width")
 
         val mm = Converter.pxToMm(width.toFloat(), this)
-        WaveView.drawSize = (mm / 12.5f * 125f).toInt()
-        WaveView.nd = width.toFloat() / WaveView.drawSize
-        WaveView.data = IntArray(WaveView.drawSize) {
-            0
-        }
+
     }
 
     private fun intToIp(paramInt: Int): String {
