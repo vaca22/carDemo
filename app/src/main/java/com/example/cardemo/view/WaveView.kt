@@ -203,11 +203,11 @@ class WaveView : View {
         val screen_mm_width = EcgWaveUtil.convertPx2MM(context, width.toFloat())
         val time = screen_mm_width / speed
         drawSize = (time * 125).toInt();
-        WaveView.nd = width.toFloat() / WaveView.drawSize
-        WaveView.data = IntArray(WaveView.drawSize) {
-            0
+        if(WaveView.data==null){
+            WaveView.data = IntArray(WaveView.drawSize) {
+                0
+            }
         }
-
         nd = width / drawSize.toFloat()
         canvas.drawARGB(0, 0, 0, 0)
         val baseY = 5f * pixelsPerMv
