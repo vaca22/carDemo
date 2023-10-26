@@ -18,7 +18,7 @@ import com.example.cardemo.databinding.ActivityMainBinding
 import com.example.cardemo.utils.NetUtils
 import com.example.cardemo.utils.PathUtil
 import com.example.cardemo.view.Converter
-import com.example.cardemo.view.Er1WaveUtil
+import com.example.cardemo.view.EcgWaveUtil
 import com.example.cardemo.view.FullEcgAmpAdapter
 import com.example.cardemo.view.WavePara
 import com.example.cardemo.view.WavePara.drawTask
@@ -281,7 +281,7 @@ class MainActivity : AppCompatActivity() {
 
 
                         for (k in 0 until intArray3.size) {
-                            WavePara.waveDataX.offer(Er1WaveUtil.byteTomV(intArray3[k]))
+                            WavePara.waveDataX.offer(EcgWaveUtil.byteTomV(intArray3[k]))
                         }
                     }
                 }

@@ -7,7 +7,7 @@ import android.util.TypedValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Er1WaveUtil {
+public class EcgWaveUtil {
     public static float byteTomV(int src2) {
         short src = (short) src2;
         byte a= (byte) (src&0xff);

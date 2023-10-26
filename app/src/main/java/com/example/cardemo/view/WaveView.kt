@@ -23,7 +23,7 @@ class WaveView : View {
         val speed = 12.5f  //12.5mm/s
         var drawSize = 862
         var nd: Float = 0f
-        lateinit var data: IntArray
+        var data: IntArray? = null
 
         val pkgsize = 4
 
@@ -38,8 +38,10 @@ class WaveView : View {
 
         fun reset() {
             waveDataX.clear()
-            for (k in 0 until drawSize) {
-                data[k] = 0
+            if(data!=null){
+                for (k in 0 until data!!.size) {
+                    data!![k] = 0
+                }
             }
             gIndex = 0
             disp = false
@@ -48,9 +50,9 @@ class WaveView : View {
             currentTail = 0
         }
 
-        fun process(it: Er1Draw) {
+        fun process(it: EcgDrawBean) {
             for (k in 0 until pkgsize) {
-                data[currentUpdateIndex] = (it.data[k] * pixelsPerMv).toInt()
+                data!![currentUpdateIndex] = (it.data[k] * pixelsPerMv).toInt()
                 currentUpdateIndex++
                 if (currentUpdateIndex >= drawSize) {
                     currentUpdateIndex -= drawSize
@@ -68,6 +70,9 @@ class WaveView : View {
 
         class DrawTask() : TimerTask() {
             override fun run() {
+                if(WaveView.data==null){
+                    return
+                }
                 if (waveDataX.size > 40) {
                     for (k in 1..6) {
                         val data = waveDataX.poll()
@@ -80,7 +85,7 @@ class WaveView : View {
                         gIndex++
                         if (gIndex >= pkgsize) {
                             gIndex = 0
-                            process(Er1Draw(drawPkg))
+                            process(EcgDrawBean(drawPkg))
                             updateSignal.postValue(true)
                         }
                     }
@@ -96,7 +101,7 @@ class WaveView : View {
                         gIndex++
                         if (gIndex >= pkgsize) {
                             gIndex = 0
-                            process(Er1Draw(drawPkg))
+                            process(EcgDrawBean(drawPkg))
                             updateSignal.postValue(true)
                         }
                     }
@@ -195,7 +200,7 @@ class WaveView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val screen_mm_width = Er1WaveUtil.convertPx2MM(context, width.toFloat())
+        val screen_mm_width = EcgWaveUtil.convertPx2MM(context, width.toFloat())
         val time = screen_mm_width / speed
         drawSize = (time * 125).toInt();
         WaveView.nd = width.toFloat() / WaveView.drawSize
@@ -215,10 +220,10 @@ class WaveView : View {
         )
         canvas.drawText("1mV", 35f, baseY + 35f, timePaint)
         if (disp) {
-            for ((index, h) in data.withIndex()) {
+            for ((index, h) in data!!.withIndex()) {
                 val h1 = h * realTimeDoubler
                 n2 = judgePoint(index)
-                if ((n2 == 1) && (index == data.size - 1)) {
+                if ((n2 == 1) && (index == data!!.size - 1)) {
                     canvas.drawEcg()
                     n1 = 0
                     break
