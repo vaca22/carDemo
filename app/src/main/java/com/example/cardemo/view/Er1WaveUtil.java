@@ -9,35 +9,6 @@ public class Er1WaveUtil {
         if (a == (byte) 0xff && b == (byte) 0x7f)
             return 0f;
         int n = ((a & 0xFF) | (short) (b << 8));
-        return (float)(n * 0.0738547929319);
-    }
-
-    public static float byteTomV2(int src) {
-        //src 为 0-0xFFFF 的 16bit 数值，其中 0 值为 0x8000，大于 0x8000 为正值，小于
-        //0x8000 为负值。
-        int n=0;
-        if(src>=0x8000){
-            n=src-0x8000;
-        }else{
-            n=0x8000-src;
-        }
-
-        return (float) (n * 0.0738547929319);
-    }
-
-    public static float byteTomV3(int src){
-        int n=src;
-        if((src & 0x8000)==0x8000){
-            src=src-1;
-            src=src^0xffff;
-            n=-(src&0x7fff);
-        }
-        return (float) (n * 0.0738547929319);
-    }
-
-    public static float byteTomV4(int src){
-        int n=src;
-
-        return (float) (n * 0.0738547929319);
+        return (float)(n * 0.00215517);
     }
 }

@@ -106,15 +106,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        //update msgCounter every 1s
-//        Timer().schedule(object : java.util.TimerTask() {
-//            override fun run() {
-//                msgCounter.postValue("receive: $receiveCount, display: $displayCount")
-//                receiveCount=0;
-//                displayCount=0;
-//            }
-//        }, 1000, 12000)
-
 
 
 
@@ -131,7 +122,6 @@ class MainActivity : AppCompatActivity() {
                 status = 1
                 binding.start.text = "停止录制"
                 binding.status.text = "正在录制"
-
             } else {
                 status = 0
                 binding.start.text = "开始录制"
@@ -216,7 +206,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         initEcg()
-//        initOfferTask()
         super.onStart()
     }
 
