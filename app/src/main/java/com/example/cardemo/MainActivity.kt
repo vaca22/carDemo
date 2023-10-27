@@ -103,6 +103,17 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        //update binding.msgCounter.text every 1 second
+        Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    binding.msgCounter.text = "${WavePara.waveDataX.size}"
+                }
+
+
+            }
+        }, 0, 1000)
+
 
 
 
@@ -161,7 +172,7 @@ class MainActivity : AppCompatActivity() {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
         val gate = intToIp(wifiManager.dhcpInfo.ipAddress)
         binding.status.text = gate
-
+        initEcg()
         initAmp()
         initAndroidCar()
     }
@@ -200,16 +211,16 @@ class MainActivity : AppCompatActivity() {
         binding.reg.adapter = buttonAdapter
     }
 
-    override fun onStart() {
-        initEcg()
-        super.onStart()
-    }
-
-    override fun onStop() {
-        drawTask?.cancel()
-        drawTask = null
-        super.onStop()
-    }
+//    override fun onStart() {
+//
+//        super.onStart()
+//    }
+//
+//    override fun onStop() {
+//        drawTask?.cancel()
+//        drawTask = null
+//        super.onStop()
+//    }
 
     private fun initEcg() {
         if (drawTask == null) {
@@ -225,8 +236,118 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    var mCarPropertyManager: CarPropertyManager? = null
+
+    val ecgValueCallback=object :
+        CarPropertyManager.CarPropertyEventCallback {
+        override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+            if (carPropertyValue != null) {
+                if (carPropertyValue.value is Array<*>) {
+                    val temp = carPropertyValue.value as Array<*>
+                    val intArray2 = IntArray(temp.size) {
+                        temp[it] as Int
+                    }
+                    //move intArray2 last  3 number to first
+                    //create new intArray3
+                    val intArray3 = IntArray(intArray2.size) {
+                        0
+                    }
+                    //move intArray2 last  3 number to first
+                    for (k in 0 until intArray2.size - 3) {
+                        intArray3[k+3] = intArray2[k]
+                    }
+                    for (k in 0 until 3) {
+                        intArray3[k] = intArray2[intArray2.size - 3 + k]
+                    }
 
 
+                    Log.e("vaca", "ecg: ${intArray3.size}")
+                    var string=""
+                    for(k in 0 until intArray3.size){
+                        string+=intArray3[k].toString()+","
+                    }
+                    Log.i("ecg_info",string);
+
+                    msgCounterArray.add(intArray3.size)
+                    if (status == 1) {
+                        var string=""
+                        for(k in 0 until intArray3.size){
+                            string+=intArray3[k].toString()+","
+                        }
+                        Log.i("ecg_info",string);
+                        for (k in 0 until intArray3.size) {
+                            ecgArray.add(intArray3[k].toShort())
+                        }
+                    }
+
+                    receiveCount+=15;
+
+
+                    for (k in 0 until intArray3.size) {
+                        WavePara.waveDataX.offer(EcgWaveUtil.byteTomV(intArray3[k]))
+                    }
+                }
+            }
+        }
+
+        override fun onErrorEvent(p0: Int, p1: Int) {
+
+        }
+
+    }
+
+    val ecgLeadCallback=object :
+        CarPropertyManager.CarPropertyEventCallback {
+        override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+            if (carPropertyValue != null) {
+                if (carPropertyValue.value is Int) {
+                    if (carPropertyValue.value == 1) {
+                        leadStatus.postValue("导联状态：脱落")
+                    } else {
+                        leadStatus.postValue("导联状态：正常")
+                    }
+                }
+            }
+        }
+
+        override fun onErrorEvent(p0: Int, p1: Int) {
+
+        }
+
+    }
+    var last=-1;
+    val ecgCounterCallback=object :
+        CarPropertyManager.CarPropertyEventCallback {
+        override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+            if (carPropertyValue != null) {
+                if (carPropertyValue.value is Int) {
+
+                    if(last==-1){
+                        last=carPropertyValue.value as Int
+                    }else{
+                        last=(last+1)%16
+                        if(last!=(carPropertyValue.value as Int)){
+                            msgCounter.postValue("丢数据了")
+                        }
+                        last=carPropertyValue.value as Int
+                    }
+
+
+
+
+
+
+//
+//                        msgCounterArray.add(carPropertyValue.value as Int)
+                }
+            }
+        }
+
+        override fun onErrorEvent(p0: Int, p1: Int) {
+
+        }
+
+    }
     private fun initAndroidCar() {
         val car = Car.createCar(this)
         if (car == null) {
@@ -237,117 +358,24 @@ class MainActivity : AppCompatActivity() {
             binding.hint.text = "create car success"
             Log.e("vaca", "car is not null")
         }
-        val mCarPropertyManager = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
+        mCarPropertyManager = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
 
-        mCarPropertyManager.registerCallback(object :
-            CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-                if (carPropertyValue != null) {
-                    if (carPropertyValue.value is Array<*>) {
-                        val temp = carPropertyValue.value as Array<*>
-                        val intArray2 = IntArray(temp.size) {
-                            temp[it] as Int
-                        }
-                        //move intArray2 last  3 number to first
-                        //create new intArray3
-                        val intArray3 = IntArray(intArray2.size) {
-                            0
-                        }
-                        //move intArray2 last  3 number to first
-                        for (k in 0 until intArray2.size - 3) {
-                            intArray3[k+3] = intArray2[k]
-                        }
-                        for (k in 0 until 3) {
-                            intArray3[k] = intArray2[intArray2.size - 3 + k]
-                        }
+        mCarPropertyManager?.registerCallback(ecgValueCallback, propertyID.ID_ECG_VALUE, 10F)
 
-
-                        Log.e("vaca", "ecg: ${intArray3.size}")
-
-
-                        msgCounterArray.add(intArray3.size)
-                        if (status == 1) {
-                            var string=""
-                            for(k in 0 until intArray3.size){
-                                string+=intArray3[k].toString()+","
-                            }
-                            Log.i("ecg_info",string);
-                            for (k in 0 until intArray3.size) {
-                                ecgArray.add(intArray3[k].toShort())
-                            }
-                        }
-
-                        receiveCount+=15;
-
-
-                        for (k in 0 until intArray3.size) {
-                            WavePara.waveDataX.offer(EcgWaveUtil.byteTomV(intArray3[k]))
-                        }
-                    }
-                }
-            }
-
-            override fun onErrorEvent(p0: Int, p1: Int) {
-
-            }
-
-        }, propertyID.ID_ECG_VALUE, 10F)
-
-        mCarPropertyManager.registerCallback(object :
-            CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-                if (carPropertyValue != null) {
-                    if (carPropertyValue.value is Int) {
-                        if (carPropertyValue.value == 1) {
-                            leadStatus.postValue("导联状态：脱落")
-                        } else {
-                            leadStatus.postValue("导联状态：正常")
-                        }
-                    }
-                }
-            }
-
-            override fun onErrorEvent(p0: Int, p1: Int) {
-
-            }
-
-        }, propertyID.ID_ECG_LEAD_OFFST, 10F)
+        mCarPropertyManager?.registerCallback(ecgLeadCallback, propertyID.ID_ECG_LEAD_OFFST, 10F)
 
 //        ID_ECG_MSG_COUNTER
 
-        var last=-1;
-        mCarPropertyManager.registerCallback(object :
-            CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-                if (carPropertyValue != null) {
-                    if (carPropertyValue.value is Int) {
 
-                        if(last==-1){
-                            last=carPropertyValue.value as Int
-                        }else{
-                            last=(last+1)%16
-                            if(last!=(carPropertyValue.value as Int)){
-                                msgCounter.postValue("丢数据了")
-                            }
-                            last=carPropertyValue.value as Int
-                        }
+        mCarPropertyManager?.registerCallback(ecgCounterCallback, propertyID.ID_ECG_MSG_COUNTER, 10F)
 
+    }
 
-
-
-
-
-//
-//                        msgCounterArray.add(carPropertyValue.value as Int)
-                    }
-                }
-            }
-
-            override fun onErrorEvent(p0: Int, p1: Int) {
-
-            }
-
-        }, propertyID.ID_ECG_MSG_COUNTER, 10F)
+    override fun onDestroy() {
+        mCarPropertyManager?.unregisterCallback(ecgValueCallback, propertyID.ID_ECG_VALUE)
+        mCarPropertyManager?.unregisterCallback(ecgLeadCallback, propertyID.ID_ECG_LEAD_OFFST)
+        mCarPropertyManager?.unregisterCallback(ecgCounterCallback, propertyID.ID_ECG_MSG_COUNTER)
+        super.onDestroy()
 
     }
 
