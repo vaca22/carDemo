@@ -262,11 +262,11 @@ class MainActivity : AppCompatActivity() {
 
 
                     Log.e("vaca", "ecg: ${intArray3.size}")
-                    var string=""
-                    for(k in 0 until intArray3.size){
-                        string+=intArray3[k].toString()+","
-                    }
-                    Log.i("ecg_info",string);
+//                    var string=""
+//                    for(k in 0 until intArray3.size){
+//                        string+=intArray3[k].toString()+","
+//                    }
+//                    Log.i("ecg_info",string);
 
                     msgCounterArray.add(intArray3.size)
                     if (status == 1) {
