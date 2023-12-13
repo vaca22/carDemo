@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     val leadStatus = MutableLiveData<String>()
 
+    var isLeadOff = true
 
 
     val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
@@ -171,6 +172,9 @@ class MainActivity : AppCompatActivity() {
     val ecgValueCallback=object :
         CarPropertyManager.CarPropertyEventCallback {
         override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
+            if(isLeadOff){
+                return
+            }
             if (carPropertyValue != null) {
                 if (carPropertyValue.value is Array<*>) {
                     val temp = carPropertyValue.value as Array<*>
@@ -216,8 +220,10 @@ class MainActivity : AppCompatActivity() {
                 if (carPropertyValue.value is Int) {
                     if (carPropertyValue.value == 1) {
                         leadStatus.postValue("导联状态：脱落")
+                        isLeadOff = true
                     } else {
                         leadStatus.postValue("导联状态：正常")
+                        isLeadOff = false
                     }
                 }
             }
