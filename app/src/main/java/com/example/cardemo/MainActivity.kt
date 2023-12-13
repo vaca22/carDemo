@@ -25,6 +25,7 @@ import com.example.cardemo.view.WavePara.drawTask
 
 import com.example.cardemo.view.WavePara.updateSignal
 import com.example.cardemo.view.WaveView
+import com.viatom.gqsdk.EcgAnalysis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,21 +38,14 @@ import java.util.Date
 import java.util.Timer
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        var displayCount=0;
-        var receiveCount=0;
 
-
-    }
 
     val dataScope = CoroutineScope(Dispatchers.IO)
     private lateinit var binding: ActivityMainBinding
 
     val leadStatus = MutableLiveData<String>()
 
-    val msgCounter = MutableLiveData<String>()
 
-    var recordFile: File? = null
 
     val ampx = arrayOf("1.25 mm/mV", "2.5 mm/mV", "5 mm/mV", "10 mm/mV", "20 mm/mV")
     val ampn = arrayOf(0.125f, 0.25f, 0.5f, 1f, 2f)
@@ -75,22 +69,15 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    var ecgArray: ArrayList<Short> = ArrayList()
-    var msgCounterArray: ArrayList<Int> = ArrayList()
-
-    var status = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        EcgAnalysis.init()
         PathUtil.initVar(this)
         getScreenInfo()
 
-        msgCounter.observe(this) {
-            binding.msgCounter.text = "msgCounter: $it"
-        }
 
 
         updateSignal.observe(this) {
@@ -103,7 +90,6 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        //update binding.msgCounter.text every 1 second
         Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
             override fun run() {
                 runOnUiThread {
@@ -117,61 +103,6 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
-        binding.start.text = "开始录制"
-        binding.status.text = "未录制"
-
-        binding.start.setOnClickListener {
-            if (status == 0) {
-                msgCounterArray.clear()
-                ecgArray.clear()
-                recordFile=File(PathUtil.getPathX("record.txt"))
-                status = 1
-                binding.start.text = "停止录制"
-                binding.status.text = "正在录制"
-            } else {
-                status = 0
-                binding.start.text = "开始录制"
-                binding.status.text = "未录制"
-                val byteBuffer =
-                    ByteBuffer.allocate(2 * ecgArray.size).order(ByteOrder.LITTLE_ENDIAN)
-                for (k in 0 until ecgArray.size) {
-                    byteBuffer.putShort(ecgArray[k])
-                }
-                val timeString =
-                    java.text.SimpleDateFormat("yyyyMMddHHmmss").format(java.util.Date()) + ".dat"
-                val couterString = timeString.replace(".dat", ".txt")
-                dataScope.launch {
-                    sleep(100)
-                    val file = File(PathUtil.getPathX(timeString))
-                    file.writeBytes(byteBuffer.array())
-
-                    val fileCounter = File(PathUtil.getPathX(couterString))
-                    for (k in 0 until msgCounterArray.size) {
-                        fileCounter.appendText("${msgCounterArray[k]}\n")
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "正在上传", Toast.LENGTH_SHORT).show()
-                    }
-                    try {
-                       val str = NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", file);
-                       // NetUtils.postFile("http://vaca.tpddns.cn:9889/ecg_file", fileCounter);
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@MainActivity, "上传成功", Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@MainActivity, "上传失败", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-
-        }
-        val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val gate = intToIp(wifiManager.dhcpInfo.ipAddress)
-        binding.status.text = gate
         initEcg()
         initAmp()
         initAndroidCar()
@@ -211,16 +142,7 @@ class MainActivity : AppCompatActivity() {
         binding.reg.adapter = buttonAdapter
     }
 
-//    override fun onStart() {
-//
-//        super.onStart()
-//    }
-//
-//    override fun onStop() {
-//        drawTask?.cancel()
-//        drawTask = null
-//        super.onStop()
-//    }
+
 
     private fun initEcg() {
         if (drawTask == null) {
@@ -253,38 +175,21 @@ class MainActivity : AppCompatActivity() {
                         0
                     }
                     //move intArray2 last  3 number to first
-                    for (k in 0 until intArray2.size - 3) {
-                        intArray3[k+3] = intArray2[k]
-                    }
+
                     for (k in 0 until 3) {
                         intArray3[k] = intArray2[intArray2.size - 3 + k]
                     }
-
-
-                    Log.e("vaca", "ecg: ${intArray3.size}")
-//                    var string=""
-//                    for(k in 0 until intArray3.size){
-//                        string+=intArray3[k].toString()+","
-//                    }
-//                    Log.i("ecg_info",string);
-
-                    msgCounterArray.add(intArray3.size)
-                    if (status == 1) {
-                        var string=""
-                        for(k in 0 until intArray3.size){
-                            string+=intArray3[k].toString()+","
-                        }
-                        Log.i("ecg_info",string);
-                        for (k in 0 until intArray3.size) {
-                            ecgArray.add(intArray3[k].toShort())
-                        }
+                    for (k in 0 until intArray2.size - 3) {
+                        intArray3[k+3] =intArray2[k]
                     }
 
-                    receiveCount+=15;
+                    Log.e("vaca", "ecg: ${intArray3.size}")
+
+
 
 
                     for (k in 0 until intArray3.size) {
-                        WavePara.waveDataX.offer(EcgWaveUtil.byteTomV(intArray3[k]))
+                        WavePara.waveDataX.offer( EcgWaveUtil.byteToFilter(intArray3[k]) )
                     }
                 }
             }
@@ -315,39 +220,9 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    var last=-1;
-    val ecgCounterCallback=object :
-        CarPropertyManager.CarPropertyEventCallback {
-        override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-            if (carPropertyValue != null) {
-                if (carPropertyValue.value is Int) {
-
-                    if(last==-1){
-                        last=carPropertyValue.value as Int
-                    }else{
-                        last=(last+1)%16
-                        if(last!=(carPropertyValue.value as Int)){
-                            msgCounter.postValue("丢数据了")
-                        }
-                        last=carPropertyValue.value as Int
-                    }
 
 
 
-
-
-
-//
-//                        msgCounterArray.add(carPropertyValue.value as Int)
-                }
-            }
-        }
-
-        override fun onErrorEvent(p0: Int, p1: Int) {
-
-        }
-
-    }
     private fun initAndroidCar() {
         val car = Car.createCar(this)
         if (car == null) {
@@ -359,22 +234,13 @@ class MainActivity : AppCompatActivity() {
             Log.e("vaca", "car is not null")
         }
         mCarPropertyManager = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
-
         mCarPropertyManager?.registerCallback(ecgValueCallback, propertyID.ID_ECG_VALUE, 10F)
-
         mCarPropertyManager?.registerCallback(ecgLeadCallback, propertyID.ID_ECG_LEAD_OFFST, 10F)
-
-//        ID_ECG_MSG_COUNTER
-
-
-        mCarPropertyManager?.registerCallback(ecgCounterCallback, propertyID.ID_ECG_MSG_COUNTER, 10F)
-
     }
 
     override fun onDestroy() {
         mCarPropertyManager?.unregisterCallback(ecgValueCallback, propertyID.ID_ECG_VALUE)
         mCarPropertyManager?.unregisterCallback(ecgLeadCallback, propertyID.ID_ECG_LEAD_OFFST)
-        mCarPropertyManager?.unregisterCallback(ecgCounterCallback, propertyID.ID_ECG_MSG_COUNTER)
         super.onDestroy()
 
     }

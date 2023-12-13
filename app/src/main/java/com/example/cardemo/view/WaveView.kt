@@ -79,7 +79,6 @@ class WaveView : View {
                         if (data == null) {
                             return
                         } else {
-                            MainActivity.displayCount++
                             drawPkg[gIndex] = data
                         }
                         gIndex++
@@ -95,7 +94,6 @@ class WaveView : View {
                         if (data == null) {
                             return
                         } else {
-                            MainActivity.displayCount++
                             drawPkg[gIndex] = data
                         }
                         gIndex++
