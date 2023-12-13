@@ -94,8 +94,14 @@ class MainActivity : AppCompatActivity() {
         Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
             override fun run() {
                 val hr = EcgAnalysis.getHR()
-                runOnUiThread {
-                    binding.hr.text = "心率：$hr"
+                if(hr==0){
+                    runOnUiThread {
+                        binding.hr.text = "心率：--"
+                    }
+                }else{
+                    runOnUiThread {
+                        binding.hr.text = "心率：$hr"
+                    }
                 }
             }
         }, Date(), 1000)
