@@ -90,6 +90,16 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        //update hr every 1 second
+        Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
+            override fun run() {
+                val hr = EcgAnalysis.getHR()
+                runOnUiThread {
+                    binding.hr.text = "心率：$hr"
+                }
+            }
+        }, Date(), 1000)
+
 
 
 
