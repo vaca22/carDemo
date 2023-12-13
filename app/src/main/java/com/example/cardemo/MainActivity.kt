@@ -90,15 +90,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
-            override fun run() {
-                runOnUiThread {
-                    binding.msgCounter.text = "${WavePara.waveDataX.size}"
-                }
 
-
-            }
-        }, 0, 1000)
 
 
 
