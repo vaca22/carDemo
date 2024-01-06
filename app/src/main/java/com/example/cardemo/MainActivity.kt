@@ -148,6 +148,11 @@ class MainActivity : AppCompatActivity() {
             EcgAnalysis.init()
         }
 
+        binding.report.setOnClickListener {
+            val report = EcgAnalysis.getEcgResult()
+            binding.reportText.text=report.resultText+"\n"+System.currentTimeMillis()
+        }
+
 
 
         initEcg()
