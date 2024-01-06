@@ -123,17 +123,30 @@ class MainActivity : AppCompatActivity() {
             doubleList.add(d)
         }
 
+        var stopFlag=false
 
         var simuIndex = 0;
         Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
             override fun run() {
                 for (k in 0 until 15) {
-                    WavePara.waveDataX.offer(EcgWaveUtil.byteToFilterSimu((doubleList[simuIndex%doubleList.size]*2).toInt()))
+                    if(!stopFlag){
+                        WavePara.waveDataX.offer(EcgWaveUtil.byteToFilterSimu((doubleList[simuIndex%doubleList.size]).toInt()))
+                    }
+
                     simuIndex++
                 }
             }
         }, Date(), 125)
 
+        binding.stopGiveData.setOnClickListener {
+            stopFlag=true
+
+        }
+
+        binding.giveData.setOnClickListener {
+            stopFlag=false
+            EcgAnalysis.init()
+        }
 
 
 
