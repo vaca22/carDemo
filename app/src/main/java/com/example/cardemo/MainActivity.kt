@@ -5,11 +5,13 @@ import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
 import android.content.Context
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,6 +38,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Date
 import java.util.Timer
+import kotlin.math.sin
 
 class MainActivity : AppCompatActivity() {
 
@@ -69,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -90,16 +93,15 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
         //update hr every 1 second
         Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
             override fun run() {
                 val hr = EcgAnalysis.getHR()
-                if(hr==0){
+                if (hr == 0) {
                     runOnUiThread {
                         binding.hr.text = "心率：--"
                     }
-                }else{
+                } else {
                     runOnUiThread {
                         binding.hr.text = "心率：$hr"
                     }
@@ -107,7 +109,30 @@ class MainActivity : AppCompatActivity() {
             }
         }, Date(), 1000)
 
+        //read assets file and parse to double
 
+        val doubleList = mutableListOf<Double>()
+        val file = assets.open("double_raw.dat")
+
+        val fileByteArray = ByteArray(file.available())
+        file.read(fileByteArray)
+        val byteBuffer = ByteBuffer.wrap(fileByteArray)
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
+        for (k in 0 until fileByteArray.size / 8) {
+            val d = byteBuffer.getDouble()
+            doubleList.add(d)
+        }
+
+
+        var simuIndex = 0;
+        Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
+            override fun run() {
+                for (k in 0 until 15) {
+                    WavePara.waveDataX.offer(EcgWaveUtil.byteToFilterSimu((doubleList[simuIndex%doubleList.size]*2).toInt()))
+                    simuIndex++
+                }
+            }
+        }, Date(), 125)
 
 
 
@@ -152,7 +177,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     private fun initEcg() {
         if (drawTask == null) {
             try {
@@ -169,10 +193,10 @@ class MainActivity : AppCompatActivity() {
 
     var mCarPropertyManager: CarPropertyManager? = null
 
-    val ecgValueCallback=object :
+    val ecgValueCallback = object :
         CarPropertyManager.CarPropertyEventCallback {
         override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
-            if(isLeadOff){
+            if (isLeadOff) {
                 return
             }
             if (carPropertyValue != null) {
@@ -192,7 +216,7 @@ class MainActivity : AppCompatActivity() {
                         intArray3[k] = intArray2[intArray2.size - 3 + k]
                     }
                     for (k in 0 until intArray2.size - 3) {
-                        intArray3[k+3] =intArray2[k]
+                        intArray3[k + 3] = intArray2[k]
                     }
 
                     Log.e("vaca", "ecg: ${intArray3.size}")
@@ -201,7 +225,7 @@ class MainActivity : AppCompatActivity() {
 
 
                     for (k in 0 until intArray3.size) {
-                        WavePara.waveDataX.offer( EcgWaveUtil.byteToFilter(intArray3[k]) )
+                        WavePara.waveDataX.offer(EcgWaveUtil.byteToFilter(intArray3[k]))
                     }
                 }
             }
@@ -213,7 +237,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    val ecgLeadCallback=object :
+    val ecgLeadCallback = object :
         CarPropertyManager.CarPropertyEventCallback {
         override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>?) {
             if (carPropertyValue != null) {
@@ -234,7 +258,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
 
 
     private fun initAndroidCar() {

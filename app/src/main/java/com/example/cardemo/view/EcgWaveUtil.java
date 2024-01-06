@@ -34,6 +34,11 @@ public class EcgWaveUtil {
         return result ;
     }
 
+    public static float byteToFilterSimu(int src2) {
+        float result= EcgAnalysis.INSTANCE.inputEcg(src2*200/464,0)/200.0f;
+        return result ;
+    }
+
     public static float convertMM2Px(Context context, float mm) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, mm,
                 context.getResources().getDisplayMetrics());
