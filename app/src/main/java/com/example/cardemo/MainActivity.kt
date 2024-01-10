@@ -111,42 +111,42 @@ class MainActivity : AppCompatActivity() {
 
         //read assets file and parse to double
 
-        val doubleList = mutableListOf<Double>()
-        val file = assets.open("double_raw.dat")
+//        val doubleList = mutableListOf<Double>()
+//        val file = assets.open("double_raw.dat")
+//
+//        val fileByteArray = ByteArray(file.available())
+//        file.read(fileByteArray)
+//        val byteBuffer = ByteBuffer.wrap(fileByteArray)
+//        byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
+//        for (k in 0 until fileByteArray.size / 8) {
+//            val d = byteBuffer.getDouble()
+//            doubleList.add(d)
+//        }
+//
+//        var stopFlag=false
+//
+//        var simuIndex = 0;
+//        Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
+//            override fun run() {
+//                for (k in 0 until 15) {
+//                    if(!stopFlag){
+//                        WavePara.waveDataX.offer(EcgWaveUtil.byteToFilterSimu((doubleList[simuIndex%doubleList.size]).toInt()))
+//                    }
+//
+//                    simuIndex++
+//                }
+//            }
+//        }, Date(), 125)
 
-        val fileByteArray = ByteArray(file.available())
-        file.read(fileByteArray)
-        val byteBuffer = ByteBuffer.wrap(fileByteArray)
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
-        for (k in 0 until fileByteArray.size / 8) {
-            val d = byteBuffer.getDouble()
-            doubleList.add(d)
-        }
-
-        var stopFlag=false
-
-        var simuIndex = 0;
-        Timer().scheduleAtFixedRate(object : java.util.TimerTask() {
-            override fun run() {
-                for (k in 0 until 15) {
-                    if(!stopFlag){
-                        WavePara.waveDataX.offer(EcgWaveUtil.byteToFilterSimu((doubleList[simuIndex%doubleList.size]).toInt()))
-                    }
-
-                    simuIndex++
-                }
-            }
-        }, Date(), 125)
-
-        binding.stopGiveData.setOnClickListener {
-            stopFlag=true
-
-        }
-
-        binding.giveData.setOnClickListener {
-            stopFlag=false
-            EcgAnalysis.init()
-        }
+//        binding.stopGiveData.setOnClickListener {
+//            stopFlag=true
+//
+//        }
+//
+//        binding.giveData.setOnClickListener {
+//            stopFlag=false
+//            EcgAnalysis.init()
+//        }
 
         binding.report.setOnClickListener {
             val report = EcgAnalysis.getEcgResult()
