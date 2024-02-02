@@ -223,27 +223,12 @@ class MainActivity : AppCompatActivity() {
                     val intArray2 = IntArray(temp.size) {
                         temp[it] as Int
                     }
-                    //move intArray2 last  3 number to first
-                    //create new intArray3
-                    val intArray3 = IntArray(intArray2.size) {
-                        0
-                    }
-                    //move intArray2 last  3 number to first
-
-                    for (k in 0 until 3) {
-                        intArray3[k] = intArray2[intArray2.size - 3 + k]
-                    }
-                    for (k in 0 until intArray2.size - 3) {
-                        intArray3[k + 3] = intArray2[k]
-                    }
-
-                    Log.e("vaca", "ecg: ${intArray3.size}")
 
 
 
 
-                    for (k in 0 until intArray3.size) {
-                        WavePara.waveDataX.offer(EcgWaveUtil.byteToFilter(intArray3[k]))
+                    for (k in 0 until intArray2.size) {
+                        WavePara.waveDataX.offer(EcgWaveUtil.byteToFilter(intArray2[k]))
                     }
                 }
             }
